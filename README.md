@@ -1,1 +1,1 @@
-yubin.lee
+36th AT SOPT SERVER REPO
