@@ -1,6 +1,8 @@
 package org.sopt.repository;
 
 import org.sopt.domain.Post;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,5 +47,13 @@ public class PostRepository {
 
     public boolean existsPostByTitle(int id, String title){
         return postList.stream().anyMatch(post -> post.getId() == id && post.getTitle().equals(title));
+    }
+
+    // 가장 최근 포스트 가져오기
+    public Post getLastPost(){
+        if (!postList.isEmpty()) {
+            return postList.get(postList.size() - 1);
+        }
+        return null;
     }
 }

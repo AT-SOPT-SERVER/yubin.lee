@@ -4,6 +4,8 @@ import org.sopt.domain.Post;
 import org.sopt.repository.PostRepository;
 import org.sopt.util.GeneratorId;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostService {
@@ -13,6 +15,7 @@ public class PostService {
 
     // 게시글 저장
     public void createPost(String title) throws IllegalArgumentException{
+        canCreatePost(LocalDateTime.now());
         duplicatePost(title);
         Post post = new Post(GeneratorId.generateId(), title);
         postRepository.save(post);
@@ -48,6 +51,15 @@ public class PostService {
     private void duplicatePost(String title){
         if (postRepository.existsPostByTitle(title)){
             throw new IllegalArgumentException("❌ 중복된 게시물입니다.");
+        }
+    }
+
+    // 게시물 작성 3분으로 제한
+    private void canCreatePost(LocalDateTime now) {
+        Post lastPost = postRepository.getLastPost();
+        if (lastPost == null) return;
+        if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
+            throw new IllegalArgumentException("게시글 작성은 3분 뒤에 가능합니다.");
         }
     }
 }
