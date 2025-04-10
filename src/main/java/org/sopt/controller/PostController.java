@@ -46,7 +46,6 @@ public class PostController {
     }
 
     public List<Post> searchPostsByKeyword(String keyword){
-        // 구현 예정
-        return new ArrayList<>();
+        return postService.searchPostsByKeyword(keyword);
     }
 }

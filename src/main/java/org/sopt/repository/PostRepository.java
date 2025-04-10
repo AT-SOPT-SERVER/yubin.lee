@@ -16,22 +16,14 @@ public class PostRepository {
     }
 
     public Post findPostById(int id){
-        for (Post post : postList) {
-            if (post.getId() == id) {
-                return post;
-            }
-        }
-        return null;
+        return postList.stream()
+                .filter(post -> post.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean deletePostById(int id){
-        for (Post post : postList) {
-            if (post.getId() == id) {
-                postList.remove(id);
-                return true;
-            }
-        }
-        return false;
+        return postList.removeIf(post -> post.getId() == id);
     }
 
     public boolean update(int id, String title){
@@ -41,5 +33,17 @@ public class PostRepository {
             return true;
         }
         return false;
+    }
+
+    public List<Post> search(String keyword){
+        return postList.stream().filter(post -> post.getTitle().toLowerCase().contains(keyword.toLowerCase())).toList();
+    }
+
+    public boolean existsPostByTitle(String title){
+        return postList.stream().anyMatch(post -> post.getTitle().equals(title));
+    }
+
+    public boolean existsPostByTitle(int id, String title){
+        return postList.stream().anyMatch(post -> post.getId() == id && post.getTitle().equals(title));
     }
 }

@@ -25,6 +25,7 @@ public class Post {
 
     // Setter 구현
     public void setTitle(String title){
+        Validation.isTitleValid(title);
         this.title = title;
     }
 
