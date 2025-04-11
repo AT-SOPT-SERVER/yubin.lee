@@ -39,27 +39,37 @@ public class PostService {
     // 게시글 수정
     public boolean updatePostTitle(int id, String title) throws IllegalArgumentException{
         duplicatePost(title);
-        return postRepository.update(id, title);
+        Post post = postRepository.findPostById(id);
+        if (post!= null) {
+            post.setTitle(title);
+            return true;
+        }
+        return false;
     }
 
     // 게시글 찾기
-    public List<Post> searchPostsByKeyword(String keyword){
-        return postRepository.search(keyword);
+    public List<Post> searchPostsByKeyword(String keyword) {
+        List<Post> posts = postRepository.findAll();
+        return posts.stream().filter(post -> post.getTitle().toLowerCase().contains(keyword.toLowerCase())).toList();
     }
 
     // 중복된 게시물
     private void duplicatePost(String title){
-        if (postRepository.existsPostByTitle(title)){
+        boolean isDuplicate = postRepository.findAll().stream().anyMatch(post -> post.getTitle().equalsIgnoreCase(title));
+        if (isDuplicate){
             throw new IllegalArgumentException("❌ 중복된 게시물입니다.");
         }
     }
 
     // 게시물 작성 3분으로 제한
     private void canCreatePost(LocalDateTime now) {
-        Post lastPost = postRepository.getLastPost();
-        if (lastPost == null) return;
-        if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
-            throw new IllegalArgumentException("게시글 작성은 3분 뒤에 가능합니다.");
+        List<Post> posts = postRepository.findAll();
+
+        if (!posts.isEmpty()) {
+            Post lastPost = posts.get(posts.size() - 1);
+            if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
+                throw new IllegalArgumentException("게시글 작성은 3분 뒤에 가능합니다.");
+            }
         }
     }
 }
