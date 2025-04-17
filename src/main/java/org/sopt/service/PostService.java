@@ -1,14 +1,15 @@
 package org.sopt.service;
 
 import org.sopt.domain.Post;
+import org.sopt.dto.response.PostResponseDto;
 import org.sopt.repository.PostRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class PostService {
@@ -34,13 +35,9 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    public Post getPostById(Long id){
-        Optional<Post> postOptional = postRepository.findById(id);
-        if (postOptional.isPresent()){
-            return postOptional.get();
-        } else {
-            throw new NoSuchElementException("게시물이 존재하지 않습니다.");
-        }
+    public PostResponseDto getPostById(Long id){
+        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException("게시물이 존재하지 않습니다."));
+        return new PostResponseDto(post);
     }
 
     // 게시글 삭제
@@ -49,15 +46,11 @@ public class PostService {
     }
 
     // 게시글 수정
-    public void updatePostTitle(Long id, String title) throws IllegalArgumentException{
+    @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
+    public void updatePostTitle(Long id, String title) {
         duplicatePost(title);
-        Optional<Post> postOptional = postRepository.findById(id);
-        if (postOptional.isPresent()) {
-            postOptional.get().setTitle(title);
-        } else {
-            throw new NoSuchElementException("게시물이 존재하지 않습니다.");
-        }
-
+        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException("게시물이 존재하지 않습니다."));
+        post.setTitle(title);
     }
 
     // 게시글 찾기
@@ -70,7 +63,7 @@ public class PostService {
     private void duplicatePost(String title){
         boolean isDuplicate = postRepository.findAll().stream().anyMatch(post -> post.getTitle().equalsIgnoreCase(title));
         if (isDuplicate){
-            throw new IllegalArgumentException("❌ 중복된 게시물입니다.");
+            throw new IllegalArgumentException("게시물이 이미 존재합니다.");
         }
     }
 
