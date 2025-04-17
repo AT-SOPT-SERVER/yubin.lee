@@ -1,25 +1,35 @@
 package org.sopt.domain;
 
-import org.sopt.util.Validation;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import java.time.LocalDateTime;
 
+@Entity
 public class Post {
 
-    // private 선언하면 직접적으로 접근 불가
-    private final int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String title;
+
     private final LocalDateTime time = LocalDateTime.now();
 
-    public Post(int id, String title){
-        Validation.isTitleValid(title);
-        this.id = id;
+    public Post(){
+
+    }
+
+    public Post(String title){
+        validateTitle(title);
         this.title = title;
     }
 
     // Getter 구현
-    public int getId(){
-        return this.id;
+    public Long getId(){
+        return id;
     }
 
     public String getTitle(){
@@ -32,8 +42,17 @@ public class Post {
 
     // Setter 구현
     public void setTitle(String title){
-        Validation.isTitleValid(title);
+        validateTitle(title);
         this.title = title;
+    }
+
+    private void validateTitle(String title){
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("❌ 제목을 입력해야 합니다.");
+        }
+        if (title.length() > 30){
+            throw new IllegalArgumentException("❌ 제목은 30자 이하여야 합니다.");
+        }
     }
 
 }
