@@ -68,13 +68,11 @@ public class PostService {
 
     // 게시물 작성 3분으로 제한
     private void canCreatePost(LocalDateTime now) {
-        List<Post> posts = postRepository.findAll();
-
-        if (!posts.isEmpty()) {
-            Post lastPost = posts.get(posts.size() - 1);
-            if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
-                throw new IllegalArgumentException("게시글 작성은 3분 뒤에 가능합니다.");
-            }
-        }
+        postRepository.findTopByOrderByTimeDesc()
+                .ifPresent(lastPost -> {
+                    if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
+                        throw new IllegalArgumentException("게시물 작성은 3분 뒤에 가능합니다.");
+                    }
+                });
     }
 }

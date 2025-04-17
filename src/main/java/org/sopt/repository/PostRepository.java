@@ -15,4 +15,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findById(Long id);
     void deleteById(Long id);
     boolean existsByTitle(String title);
+    Optional<Post> findTopByOrderByTimeDesc();
 }
