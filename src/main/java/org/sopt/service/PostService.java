@@ -2,22 +2,29 @@ package org.sopt.service;
 
 import org.sopt.domain.Post;
 import org.sopt.repository.PostRepository;
-import org.sopt.util.GeneratorId;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
+@Service
 public class PostService {
 
     // postRepository 가져오기
-    private final PostRepository postRepository = new PostRepository();
+    private final PostRepository postRepository;
+
+    public PostService(PostRepository postRepository){
+        this.postRepository = postRepository;
+    }
 
     // 게시글 저장
     public void createPost(String title) throws IllegalArgumentException{
         canCreatePost(LocalDateTime.now());
         duplicatePost(title);
-        Post post = new Post(GeneratorId.generateId(), title);
+        Post post = new Post(title);
         postRepository.save(post);
     }
 
@@ -27,24 +34,30 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    public Post getPostById(int id){
-        return postRepository.findPostById(id);
+    public Post getPostById(Long id){
+        Optional<Post> postOptional = postRepository.findById(id);
+        if (postOptional.isPresent()){
+            return postOptional.get();
+        } else {
+            throw new NoSuchElementException("게시물이 존재하지 않습니다.");
+        }
     }
 
     // 게시글 삭제
-    public boolean deletePostById(int id){
-        return postRepository.deletePostById(id);
+    public void deletePostById(Long id){
+        postRepository.deleteById(id);
     }
 
     // 게시글 수정
-    public boolean updatePostTitle(int id, String title) throws IllegalArgumentException{
+    public void updatePostTitle(Long id, String title) throws IllegalArgumentException{
         duplicatePost(title);
-        Post post = postRepository.findPostById(id);
-        if (post!= null) {
-            post.setTitle(title);
-            return true;
+        Optional<Post> postOptional = postRepository.findById(id);
+        if (postOptional.isPresent()) {
+            postOptional.get().setTitle(title);
+        } else {
+            throw new NoSuchElementException("게시물이 존재하지 않습니다.");
         }
-        return false;
+
     }
 
     // 게시글 찾기

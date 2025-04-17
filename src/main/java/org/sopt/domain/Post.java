@@ -1,25 +1,35 @@
 package org.sopt.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.sopt.util.Validation;
 
 import java.time.LocalDateTime;
 
+@Entity
 public class Post {
 
-    // private 선언하면 직접적으로 접근 불가
-    private final int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String title;
+
     private final LocalDateTime time = LocalDateTime.now();
 
-    public Post(int id, String title){
-        Validation.isTitleValid(title);
-        this.id = id;
+    public Post(){
+
+    }
+
+    public Post(String title){
         this.title = title;
     }
 
     // Getter 구현
-    public int getId(){
-        return this.id;
+    public Long getId(){
+        return id;
     }
 
     public String getTitle(){
