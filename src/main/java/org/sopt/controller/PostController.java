@@ -1,11 +1,11 @@
 package org.sopt.controller;
 
+import jakarta.validation.Valid;
 import org.sopt.domain.Post;
 import org.sopt.dto.request.PostRequestDto;
 import org.sopt.dto.request.SearchRequestDto;
 import org.sopt.dto.response.PostResponseDto;
 import org.sopt.service.PostService;
-import org.sopt.util.Validation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +21,7 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<String> createPost(@RequestBody final PostRequestDto postRequestDto){
-        Validation.isTitleValid(postRequestDto.getTitle());
+    public ResponseEntity<String> createPost(@RequestBody @Valid final PostRequestDto postRequestDto){
         postService.createPost(postRequestDto.getTitle());
         return ResponseEntity.ok("게시물이 저장되었습니다.");
     }
@@ -45,8 +44,7 @@ public class PostController {
     }
 
     @PutMapping("/posts/{id}")
-    public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody final PostRequestDto postRequestDto){
-        Validation.isTitleValid(postRequestDto.getTitle());
+    public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
         postService.updatePostTitle(id, postRequestDto.getTitle());
         return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
     }

@@ -61,8 +61,7 @@ public class PostService {
 
     // 중복된 게시물
     private void duplicatePost(String title){
-        boolean isDuplicate = postRepository.findAll().stream().anyMatch(post -> post.getTitle().equalsIgnoreCase(title));
-        if (isDuplicate){
+        if (postRepository.existsByTitle(title)){
             throw new IllegalArgumentException("게시물이 이미 존재합니다.");
         }
     }

@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import org.sopt.util.Validation;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +23,7 @@ public class Post {
     }
 
     public Post(String title){
+        validateTitle(title);
         this.title = title;
     }
 
@@ -42,8 +42,17 @@ public class Post {
 
     // Setter 구현
     public void setTitle(String title){
-        Validation.isTitleValid(title);
+        validateTitle(title);
         this.title = title;
+    }
+
+    private void validateTitle(String title){
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("❌ 제목을 입력해야 합니다.");
+        }
+        if (title.length() > 30){
+            throw new IllegalArgumentException("❌ 제목은 30자 이하여야 합니다.");
+        }
     }
 
 }
