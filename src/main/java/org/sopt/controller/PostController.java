@@ -3,7 +3,6 @@ package org.sopt.controller;
 import jakarta.validation.Valid;
 import org.sopt.domain.Post;
 import org.sopt.dto.request.PostRequestDto;
-import org.sopt.dto.request.SearchRequestDto;
 import org.sopt.dto.response.PostResponseDto;
 import org.sopt.service.PostService;
 import org.springframework.http.ResponseEntity;
@@ -49,8 +48,9 @@ public class PostController {
         return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
     }
 
-    @PostMapping("/posts/search")
-    public List<Post> searchPostsByKeyword(@RequestBody SearchRequestDto searchRequestDto){
-        return postService.searchPostsByKeyword(searchRequestDto.getKeyword());
+    @PostMapping("/search")
+    public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keyword") String keyword){
+        List<Post> posts = postService.searchPostsByKeyword(keyword);
+        return ResponseEntity.ok(posts);
     }
 }

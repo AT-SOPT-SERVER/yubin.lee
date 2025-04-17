@@ -55,8 +55,7 @@ public class PostService {
 
     // 게시글 찾기
     public List<Post> searchPostsByKeyword(String keyword) {
-        List<Post> posts = postRepository.findAll();
-        return posts.stream().filter(post -> post.getTitle().toLowerCase().contains(keyword.toLowerCase())).toList();
+        return postRepository.findByTitleContainingIgnoreCase(keyword);
     }
 
     // 중복된 게시물

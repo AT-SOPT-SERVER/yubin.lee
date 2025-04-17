@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Size;
 
 public class PostRequestDto {
 
-    @NotBlank(message = "❌ 제목을 입력해야 합니다.")
-    @Size(max = 30, message = "❌ 제목은 30자 이하여야 합니다.")
+    @NotBlank(message = "제목을 입력해야 합니다.")
+    @Size(max = 30, message = "제목은 30자 이하여야 합니다.")
     private String title;
 
     public PostRequestDto(){}
