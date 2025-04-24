@@ -37,7 +37,7 @@ public class PostService {
     // 게시글 상세 조회
     public PostResponseDto getPostById(Long id){
         Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException("게시물이 존재하지 않습니다."));
-        return new PostResponseDto(post);
+        return PostResponseDto.from(post);
     }
 
     // 게시글 삭제

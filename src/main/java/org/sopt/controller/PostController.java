@@ -21,7 +21,7 @@ public class PostController {
 
     @PostMapping("/posts")
     public ResponseEntity<String> createPost(@RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.createPost(postRequestDto.getTitle());
+        postService.createPost(postRequestDto.title());
         return ResponseEntity.ok("게시물이 저장되었습니다.");
     }
 
@@ -44,13 +44,13 @@ public class PostController {
 
     @PutMapping("/posts/{id}")
     public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.updatePostTitle(id, postRequestDto.getTitle());
+        postService.updatePostTitle(id, postRequestDto.title());
         return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keyword") String keyword){
-        List<Post> posts = postService.searchPostsByKeyword(keyword);
+    public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
+        List<Post> posts = postService.searchPostsByKeyword(keywords);
         return ResponseEntity.ok(posts);
     }
 }
