@@ -16,6 +16,7 @@ public class PostService {
 
     // postRepository 가져오기
     private final PostRepository postRepository;
+    private static final String NOT_FOUND_MSG= "게시물이 존재하지 않습니다.";
 
     public PostService(PostRepository postRepository){
         this.postRepository = postRepository;
@@ -36,20 +37,22 @@ public class PostService {
 
     // 게시글 상세 조회
     public PostResponseDto getPostById(Long id){
-        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException("게시물이 존재하지 않습니다."));
+        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException(NOT_FOUND_MSG));
         return PostResponseDto.from(post);
     }
 
     // 게시글 삭제
     public void deletePostById(Long id){
-        postRepository.deleteById(id);
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
+        postRepository.delete(post);
     }
 
     // 게시글 수정
     @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
     public void updatePostTitle(Long id, String title) {
         duplicatePost(title);
-        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException("게시물이 존재하지 않습니다."));
+        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
         post.setTitle(title);
     }
 

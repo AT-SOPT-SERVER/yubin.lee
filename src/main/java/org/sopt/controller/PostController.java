@@ -42,13 +42,13 @@ public class PostController {
         return ResponseEntity.ok("게시물 삭제가 완료되었습니다.");
     }
 
-    @PutMapping("/posts/{id}")
+    @PatchMapping("/posts/{id}")
     public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
         postService.updatePostTitle(id, postRequestDto.title());
         return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
     }
 
-    @GetMapping("/search")
+    @GetMapping("/posts/search")
     public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
         List<Post> posts = postService.searchPostsByKeyword(keywords);
         return ResponseEntity.ok(posts);
