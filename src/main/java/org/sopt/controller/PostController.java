@@ -48,7 +48,7 @@ public class PostController {
         return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
     }
 
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
         List<Post> posts = postService.searchPostsByKeyword(keywords);
         return ResponseEntity.ok(posts);
