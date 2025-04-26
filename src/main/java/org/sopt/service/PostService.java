@@ -1,23 +1,32 @@
 package org.sopt.service;
 
 import org.sopt.domain.Post;
+import org.sopt.dto.response.PostResponseDto;
 import org.sopt.repository.PostRepository;
-import org.sopt.util.GeneratorId;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+@Service
 public class PostService {
 
     // postRepository 가져오기
-    private final PostRepository postRepository = new PostRepository();
+    private final PostRepository postRepository;
+    private static final String NOT_FOUND_MSG= "게시물이 존재하지 않습니다.";
+
+    public PostService(PostRepository postRepository){
+        this.postRepository = postRepository;
+    }
 
     // 게시글 저장
     public void createPost(String title) throws IllegalArgumentException{
         canCreatePost(LocalDateTime.now());
         duplicatePost(title);
-        Post post = new Post(GeneratorId.generateId(), title);
+        Post post = new Post(title);
         postRepository.save(post);
     }
 
@@ -27,49 +36,45 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    public Post getPostById(int id){
-        return postRepository.findPostById(id);
+    public PostResponseDto getPostById(Long id){
+        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException(NOT_FOUND_MSG));
+        return PostResponseDto.from(post);
     }
 
     // 게시글 삭제
-    public boolean deletePostById(int id){
-        return postRepository.deletePostById(id);
+    public void deletePostById(Long id){
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
+        postRepository.delete(post);
     }
 
     // 게시글 수정
-    public boolean updatePostTitle(int id, String title) throws IllegalArgumentException{
+    @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
+    public void updatePostTitle(Long id, String title) {
         duplicatePost(title);
-        Post post = postRepository.findPostById(id);
-        if (post!= null) {
-            post.setTitle(title);
-            return true;
-        }
-        return false;
+        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
+        post.setTitle(title);
     }
 
     // 게시글 찾기
     public List<Post> searchPostsByKeyword(String keyword) {
-        List<Post> posts = postRepository.findAll();
-        return posts.stream().filter(post -> post.getTitle().toLowerCase().contains(keyword.toLowerCase())).toList();
+        return postRepository.findByTitleContainingIgnoreCase(keyword);
     }
 
     // 중복된 게시물
     private void duplicatePost(String title){
-        boolean isDuplicate = postRepository.findAll().stream().anyMatch(post -> post.getTitle().equalsIgnoreCase(title));
-        if (isDuplicate){
-            throw new IllegalArgumentException("❌ 중복된 게시물입니다.");
+        if (postRepository.existsByTitle(title)){
+            throw new IllegalArgumentException("게시물이 이미 존재합니다.");
         }
     }
 
     // 게시물 작성 3분으로 제한
     private void canCreatePost(LocalDateTime now) {
-        List<Post> posts = postRepository.findAll();
-
-        if (!posts.isEmpty()) {
-            Post lastPost = posts.get(posts.size() - 1);
-            if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
-                throw new IllegalArgumentException("게시글 작성은 3분 뒤에 가능합니다.");
-            }
-        }
+        postRepository.findTopByOrderByTimeDesc()
+                .ifPresent(lastPost -> {
+                    if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
+                        throw new IllegalArgumentException("게시물 작성은 3분 뒤에 가능합니다.");
+                    }
+                });
     }
 }

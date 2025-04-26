@@ -1,51 +1,56 @@
 package org.sopt.controller;
 
+import jakarta.validation.Valid;
 import org.sopt.domain.Post;
+import org.sopt.dto.request.PostRequestDto;
+import org.sopt.dto.response.PostResponseDto;
 import org.sopt.service.PostService;
-import org.sopt.util.Validation;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@RestController
 public class PostController {
 
-    private final PostService postService = new PostService();
+    private final PostService postService;
 
-    public boolean createPost(String title){
-        try {
-            Validation.isTitleValid(title);
-            postService.createPost(title);
-            return true;
-        } catch (IllegalArgumentException e){
-            System.out.println(e.getMessage());
-            return false;
-        }
+    public PostController(PostService postService){
+        this.postService = postService;
     }
 
-    public List<Post> getAllPosts(){
-        return postService.getAllPosts();
+    @PostMapping("/posts")
+    public ResponseEntity<String> createPost(@RequestBody @Valid final PostRequestDto postRequestDto){
+        postService.createPost(postRequestDto.title());
+        return ResponseEntity.ok("게시물이 저장되었습니다.");
     }
 
-    public Post getPostById(int id){
-        return postService.getPostById(id);
+    @GetMapping("/posts")
+    public ResponseEntity<List<Post>> getAllPosts(){
+        return ResponseEntity.ok(postService.getAllPosts());
     }
 
-    public boolean deletePostById(int id){
-        return postService.deletePostById(id);
-
+    @GetMapping("/posts/{id}")
+    public ResponseEntity<PostResponseDto> getPostById(@PathVariable("id") Long id){
+        PostResponseDto postResponseDto = postService.getPostById(id);
+        return ResponseEntity.ok(postResponseDto);
     }
 
-    public boolean updatePostTitle(int id, String title){
-        try {
-            Validation.isTitleValid(title);
-            return postService.updatePostTitle(id, title);
-        } catch (IllegalArgumentException e){
-            System.out.println(e.getMessage());
-            return false;
-        }
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<String> deletePostById(@PathVariable("id") Long id){
+        postService.deletePostById(id);
+        return ResponseEntity.ok("게시물 삭제가 완료되었습니다.");
     }
 
-    public List<Post> searchPostsByKeyword(String keyword){
-        return postService.searchPostsByKeyword(keyword);
+    @PatchMapping("/posts/{id}")
+    public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
+        postService.updatePostTitle(id, postRequestDto.title());
+        return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
+    }
+
+    @GetMapping("/posts/search")
+    public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
+        List<Post> posts = postService.searchPostsByKeyword(keywords);
+        return ResponseEntity.ok(posts);
     }
 }
