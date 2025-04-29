@@ -16,21 +16,15 @@ public class Post {
 
     private String title;
 
-    private String imageName;
-
-    private String imageUrl;
-
     private final LocalDateTime time = LocalDateTime.now();
 
     public Post(){
 
     }
 
-    public Post(String title, String imageName, String imageUrl){
+    public Post(String title){
         validateTitle(title);
         this.title = title;
-        this.imageName = imageName;
-        this.imageUrl = imageUrl;
     }
 
     // Getter 구현
@@ -46,10 +40,6 @@ public class Post {
         return this.time;
     }
 
-    public String getImageName() { return this.imageName; }
-
-    public String getImageUrl() { return this.imageUrl; }
-
     // Setter 구현
     public void setTitle(String title){
         validateTitle(title);
@@ -58,10 +48,10 @@ public class Post {
 
     private void validateTitle(String title){
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("제목을 입력해야 합니다.");
+            throw new IllegalArgumentException("❌ 제목을 입력해야 합니다.");
         }
         if (title.length() > 30){
-            throw new IllegalArgumentException("제목은 30자 이하여야 합니다.");
+            throw new IllegalArgumentException("❌ 제목은 30자 이하여야 합니다.");
         }
     }
 
