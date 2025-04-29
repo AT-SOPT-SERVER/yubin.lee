@@ -21,7 +21,7 @@ public class PostController {
 
     @PostMapping("/posts")
     public ResponseEntity<String> createPost(@RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.createPost(postRequestDto.title());
+        postService.createPost(postRequestDto);
         return ResponseEntity.ok("게시물이 저장되었습니다.");
     }
 
@@ -44,7 +44,7 @@ public class PostController {
 
     @PatchMapping("/posts/{id}")
     public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.updatePostTitle(id, postRequestDto.title());
+        postService.updatePostTitle(id, postRequestDto);
         return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
     }
 
