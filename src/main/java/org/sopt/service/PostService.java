@@ -1,7 +1,6 @@
 package org.sopt.service;
 
 import org.sopt.domain.Post;
-import org.sopt.dto.request.PostRequestDto;
 import org.sopt.dto.response.PostResponseDto;
 import org.sopt.repository.PostRepository;
 import org.springframework.stereotype.Service;
@@ -24,10 +23,10 @@ public class PostService {
     }
 
     // 게시글 저장
-    public void createPost(PostRequestDto postRequestDto) throws IllegalArgumentException{
+    public void createPost(String title) throws IllegalArgumentException{
         canCreatePost(LocalDateTime.now());
-        duplicatePost(postRequestDto.title());
-        Post post = new Post(postRequestDto.title(), postRequestDto.imageName(), postRequestDto.imageUrl());
+        duplicatePost(title);
+        Post post = new Post(title);
         postRepository.save(post);
     }
 
@@ -51,10 +50,10 @@ public class PostService {
 
     // 게시글 수정
     @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
-    public void updatePostTitle(Long id, PostRequestDto postRequestDto) {
-        duplicatePost(postRequestDto.title());
+    public void updatePostTitle(Long id, String title) {
+        duplicatePost(title);
         Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
-        post.setTitle(postRequestDto.title());
+        post.setTitle(title);
     }
 
     // 게시글 찾기
