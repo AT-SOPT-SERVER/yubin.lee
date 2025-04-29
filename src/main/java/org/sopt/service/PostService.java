@@ -1,8 +1,12 @@
 package org.sopt.service;
 
 import org.sopt.domain.Post;
+import org.sopt.domain.User;
+import org.sopt.dto.request.PostRequestDto;
 import org.sopt.dto.response.PostResponseDto;
+import org.sopt.dto.response.SuccessResponse;
 import org.sopt.repository.PostRepository;
+import org.sopt.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,18 +20,28 @@ public class PostService {
 
     // postRepository 가져오기
     private final PostRepository postRepository;
-    private static final String NOT_FOUND_MSG= "게시물이 존재하지 않습니다.";
+    private final UserRepository userRepository;
+    private static final String NOT_FOUND_USER_MSG= "사용자가 존재하지 않습니다.";
+    private static final String NOT_FOUND_POST_MSG= "게시물이 존재하지 않습니다.";
 
-    public PostService(PostRepository postRepository){
+
+    public PostService(PostRepository postRepository, UserRepository userRepository){
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
     // 게시글 저장
-    public void createPost(String title) throws IllegalArgumentException{
+    public SuccessResponse createPost(Long userId, PostRequestDto postRequestDto) throws IllegalArgumentException{
+        // 1. 유저 검증
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_USER_MSG));
+        // 2. 포스트 검증
         canCreatePost(LocalDateTime.now());
-        duplicatePost(title);
-        Post post = new Post(title);
+        duplicatePost(postRequestDto.title());
+        // 3. dto -> Entity 변환
+        Post post = postRequestDto.toEntity(user);
+        // 4. 저장
         postRepository.save(post);
+        return new SuccessResponse("게시물이 저장되었습니다.");
     }
 
     // 전체 게시글 조회
@@ -37,23 +51,26 @@ public class PostService {
 
     // 게시글 상세 조회
     public PostResponseDto getPostById(Long id){
-        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException(NOT_FOUND_MSG));
+        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException(NOT_FOUND_POST_MSG));
         return PostResponseDto.from(post);
     }
 
     // 게시글 삭제
-    public void deletePostById(Long id){
+    public SuccessResponse deletePostById(Long id){
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
+                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
         postRepository.delete(post);
+        return new SuccessResponse("게시물이 삭제되었습니다.");
     }
 
     // 게시글 수정
     @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
-    public void updatePostTitle(Long id, String title) {
-        duplicatePost(title);
-        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
-        post.setTitle(title);
+    public SuccessResponse updatePostTitle(Long id, Long userId, PostRequestDto postRequestDto) {
+        duplicatePost(postRequestDto.title());
+        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
+        post.setTitle(postRequestDto.title());
+        post.setContent(postRequestDto.content());
+        return new SuccessResponse("게시물 수정이 완료되었습니다.");
     }
 
     // 게시글 찾기

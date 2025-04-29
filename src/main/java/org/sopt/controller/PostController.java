@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.sopt.domain.Post;
 import org.sopt.dto.request.PostRequestDto;
 import org.sopt.dto.response.PostResponseDto;
+import org.sopt.dto.response.SuccessResponse;
 import org.sopt.service.PostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +21,15 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<String> createPost(@RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.createPost(postRequestDto.title());
-        return ResponseEntity.ok("게시물이 저장되었습니다.");
+    public ResponseEntity<SuccessResponse> createPost(@RequestHeader Long userId, @RequestBody @Valid final PostRequestDto postRequestDto){
+        SuccessResponse successResponse = postService.createPost(userId, postRequestDto);
+        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/posts")
     public ResponseEntity<List<Post>> getAllPosts(){
-        return ResponseEntity.ok(postService.getAllPosts());
+        List<Post> allPosts = postService.getAllPosts();
+        return ResponseEntity.ok(allPosts);
     }
 
     @GetMapping("/posts/{id}")
@@ -37,15 +39,15 @@ public class PostController {
     }
 
     @DeleteMapping("/posts/{id}")
-    public ResponseEntity<String> deletePostById(@PathVariable("id") Long id){
-        postService.deletePostById(id);
-        return ResponseEntity.ok("게시물 삭제가 완료되었습니다.");
+    public ResponseEntity<SuccessResponse> deletePostById(@PathVariable("id") Long id){
+        SuccessResponse successResponse = postService.deletePostById(id);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PatchMapping("/posts/{id}")
-    public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.updatePostTitle(id, postRequestDto.title());
-        return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
+    public ResponseEntity<SuccessResponse> updatePostTitle(@RequestHeader Long userId, @PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
+        SuccessResponse successResponse = postService.updatePostTitle(id, userId, postRequestDto);
+        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/posts/search")
