@@ -10,6 +10,7 @@ import org.sopt.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,20 +21,17 @@ public class PostService {
 
     // postRepository 가져오기
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    private static final String NOT_FOUND_USER_MSG= "사용자가 존재하지 않습니다.";
+    private final UserService userService;
     private static final String NOT_FOUND_POST_MSG= "게시물이 존재하지 않습니다.";
 
 
-    public PostService(PostRepository postRepository, UserRepository userRepository){
+    public PostService(PostRepository postRepository, UserService userService){
         this.postRepository = postRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     // 게시글 저장
-    public SuccessResponse createPost(Long userId, PostRequestDto postRequestDto) throws IllegalArgumentException{
-        // 1. 유저 검증
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_USER_MSG));
+    public SuccessResponse createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
         // 2. 포스트 검증
         canCreatePost(LocalDateTime.now());
         duplicatePost(postRequestDto.title());
@@ -56,18 +54,21 @@ public class PostService {
     }
 
     // 게시글 삭제
-    public SuccessResponse deletePostById(Long id){
+    public SuccessResponse deletePostById(Long id, User user) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
+        userService.validatePostOwnership(post, user);
         postRepository.delete(post);
         return new SuccessResponse("게시물이 삭제되었습니다.");
     }
 
     // 게시글 수정
     @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
-    public SuccessResponse updatePostTitle(Long id, Long userId, PostRequestDto postRequestDto) {
+    public SuccessResponse updatePostTitle(Long id, User user, PostRequestDto postRequestDto) {
         duplicatePost(postRequestDto.title());
         Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
+
+
         post.setTitle(postRequestDto.title());
         post.setContent(postRequestDto.content());
         return new SuccessResponse("게시물 수정이 완료되었습니다.");

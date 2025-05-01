@@ -1,6 +1,7 @@
 package org.sopt.global;
 
 import org.sopt.dto.response.ErrorResponse;
+import org.sopt.exception.CustomAccessDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +18,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e){
         ErrorResponse errorResponse = ErrorResponse.from(HttpStatus.BAD_REQUEST, e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    // 401
+
+    // 403
+    @ExceptionHandler(CustomAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(CustomAccessDeniedException e){
+        ErrorResponse errorResponse = ErrorResponse.from(HttpStatus.FORBIDDEN, e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     // 404 - 찾을 수 없음
