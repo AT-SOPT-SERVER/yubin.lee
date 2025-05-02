@@ -14,10 +14,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findAll();
     List<Post> findByTitleContainingIgnoreCase(String keyword);
+    List<Post> findByUserNameContainingIgnoreCase(String keyword);
     Optional<Post> findById(Long id);
-    Optional<Post> findByIdAndUser(Long id, User user);
     boolean existsByTitle(String title);
-    Optional<Post> findTopByOrderByTimeDesc();
     Optional<Post> findTopByUserOrderByTimeDesc(User user);
-
 }

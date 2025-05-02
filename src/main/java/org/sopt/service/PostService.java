@@ -62,7 +62,7 @@ public class PostService {
     }
 
     // 게시글 수정
-    @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
+    @Transactional
     public String updatePostTitle(Long id, User user, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
         userService.validatePostOwnership(post, user);
@@ -72,9 +72,13 @@ public class PostService {
         return "게시물 수정이 완료되었습니다.";
     }
 
-    // 게시글 찾기
-    public List<Post> searchPostsByKeyword(String keyword) {
-        return postRepository.findByTitleContainingIgnoreCase(keyword);
+    // 카테고리별 게시물 검색
+    public List<Post> searchPosts(String keyword, String category) {
+        return switch (category.toLowerCase()) {
+            case "title" -> postRepository.findByTitleContainingIgnoreCase(keyword);
+            case "author" -> postRepository.findByUserNameContainingIgnoreCase(keyword);
+            default -> throw new CustomBadRequestException(ErrorCode.INVALID_INPUT_VALUE);
+        };
     }
 
     // 중복된 게시물
