@@ -7,6 +7,7 @@ import org.sopt.dto.response.PostAllResponseDto;
 import org.sopt.dto.response.PostDetailResponseDto;
 import org.sopt.dto.response.SuccessResponse;
 import org.sopt.exception.CustomBadRequestException;
+import org.sopt.exception.CustomNotFoundException;
 import org.sopt.exception.ErrorCode;
 import org.sopt.repository.PostRepository;
 import org.springframework.data.domain.Sort;
@@ -53,13 +54,13 @@ public class PostService {
 
     // 게시글 상세 조회
     public PostDetailResponseDto getPostById(Long id){
-        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException(NOT_FOUND_POST_MSG));
+        Post post = postRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(ErrorCode.NOT_FOUND));
         return PostDetailResponseDto.from(post);
     }
 
     // 게시글 삭제
     public String deletePostById(Long id, User user) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
         userService.validatePostOwnership(post, user);
         postRepository.delete(post);
         return "게시물이 삭제되었습니다.";
@@ -68,7 +69,7 @@ public class PostService {
     // 게시글 수정
     @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
     public String updatePostTitle(Long id, User user, PostRequestDto postRequestDto) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
         userService.validatePostOwnership(post, user);
         duplicatePost(postRequestDto.title());
         post.setTitle(postRequestDto.title());

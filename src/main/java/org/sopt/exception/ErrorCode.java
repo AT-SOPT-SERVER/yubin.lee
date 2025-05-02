@@ -17,7 +17,7 @@ public enum ErrorCode {
     EMPTY_CONTENT(HttpStatus.BAD_REQUEST.value(), "P005", "내용을 입력해야 합니다."),
 
     // PERSONAL
-    UN_AUTHENTICATION(HttpStatus.UNAUTHORIZED.value(), "U001", "존재하지 않는 사용자입니다."),
+    UN_AUTHENTICATION(HttpStatus.UNAUTHORIZED.value(), "U001", "로그인이 필요합니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "U002", "게시물에 대한 접근 권한이 없습니다.");
 
     private final int status;

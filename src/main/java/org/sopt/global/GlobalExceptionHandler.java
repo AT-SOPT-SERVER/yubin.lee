@@ -1,10 +1,7 @@
 package org.sopt.global;
 
 import org.sopt.dto.response.ErrorResponse;
-import org.sopt.exception.CustomAccessDeniedException;
-import org.sopt.exception.CustomBadRequestException;
-import org.sopt.exception.ErrorCode;
-import org.sopt.exception.UnauthenticatedException;
+import org.sopt.exception.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,9 +31,9 @@ public class GlobalExceptionHandler {
     }
 
     // 404 - not found
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchElement(NoSuchElementException e) {
-        return buildErrorResponse(ErrorCode.NOT_FOUND);
+    @ExceptionHandler(CustomNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchElement(CustomNotFoundException e) {
+        return buildErrorResponse(e.getErrorCode());
     }
 
     // 400
