@@ -1,6 +1,8 @@
 package org.sopt.domain;
 
 import jakarta.persistence.*;
+import org.sopt.exception.CustomBadRequestException;
+import org.sopt.exception.ErrorCode;
 
 import java.time.LocalDateTime;
 
@@ -67,17 +69,18 @@ public class Post {
 
     private void validateTitle(String title){
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("제목을 입력해야 합니다.");
+            throw new CustomBadRequestException(ErrorCode.EMPTY_TITLE);
         }
         if (title.length() > 30){
-            throw new IllegalArgumentException("제목은 30자 이하여야 합니다.");
+            throw new CustomBadRequestException(ErrorCode.TITLE_TOO_LONG);
         }
     }
 
     private void validateContent(String content){
         if (content == null || content.trim().isEmpty()){
-            throw new IllegalArgumentException("내용을 입력해야 합니다.");
+            throw new CustomBadRequestException(ErrorCode.EMPTY_CONTENT);
         }
     }
+
 
 }

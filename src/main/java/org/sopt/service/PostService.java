@@ -6,6 +6,8 @@ import org.sopt.dto.request.PostRequestDto;
 import org.sopt.dto.response.PostAllResponseDto;
 import org.sopt.dto.response.PostDetailResponseDto;
 import org.sopt.dto.response.SuccessResponse;
+import org.sopt.exception.CustomBadRequestException;
+import org.sopt.exception.ErrorCode;
 import org.sopt.repository.PostRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class PostService {
     }
 
     // 게시글 저장
-    public SuccessResponse createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
+    public String createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
         // 포스트 검증
         canCreatePost(LocalDateTime.now());
         duplicatePost(postRequestDto.title());
@@ -39,7 +41,7 @@ public class PostService {
         Post post = postRequestDto.toEntity(user);
         // 저장
         postRepository.save(post);
-        return new SuccessResponse("게시물이 저장되었습니다.");
+        return "게시물이 저장되었습니다.";
     }
 
     // 전체 게시글 조회 (최신순)
@@ -56,23 +58,22 @@ public class PostService {
     }
 
     // 게시글 삭제
-    public SuccessResponse deletePostById(Long id, User user) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
+    public String deletePostById(Long id, User user) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
         userService.validatePostOwnership(post, user);
         postRepository.delete(post);
-        return new SuccessResponse("게시물이 삭제되었습니다.");
+        return "게시물이 삭제되었습니다.";
     }
 
     // 게시글 수정
     @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
-    public SuccessResponse updatePostTitle(Long id, User user, PostRequestDto postRequestDto) {
-        duplicatePost(postRequestDto.title());
+    public String updatePostTitle(Long id, User user, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_POST_MSG));
         userService.validatePostOwnership(post, user);
+        duplicatePost(postRequestDto.title());
         post.setTitle(postRequestDto.title());
         post.setContent(postRequestDto.content());
-        return new SuccessResponse("게시물 수정이 완료되었습니다.");
+        return "게시물 수정이 완료되었습니다.";
     }
 
     // 게시글 찾기
@@ -83,7 +84,7 @@ public class PostService {
     // 중복된 게시물
     private void duplicatePost(String title){
         if (postRepository.existsByTitle(title)){
-            throw new IllegalArgumentException("게시물이 이미 존재합니다.");
+            throw new CustomBadRequestException(ErrorCode.POST_DUPLICATED);
         }
     }
 
@@ -92,7 +93,7 @@ public class PostService {
         postRepository.findTopByOrderByTimeDesc()
                 .ifPresent(lastPost -> {
                     if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
-                        throw new IllegalArgumentException("게시물 작성은 3분 뒤에 가능합니다.");
+                        throw new CustomBadRequestException(ErrorCode.POST_CREATION_LIMIT);
                     }
                 });
     }

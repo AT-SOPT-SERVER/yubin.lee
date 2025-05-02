@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 public class PostController {
@@ -27,41 +26,41 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<SuccessResponse> createPost(@RequestHeader("id") Long userId, @RequestBody @Valid final PostRequestDto postRequestDto){
+    public ResponseEntity<SuccessResponse<String>> createPost(@RequestHeader("id") Long userId, @RequestBody @Valid final PostRequestDto postRequestDto){
         User user = userService.existsUser(userId);
-        SuccessResponse successResponse = postService.createPost(user, postRequestDto);
-        return ResponseEntity.ok(successResponse);
+        String response = postService.createPost(user, postRequestDto);
+        return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<List<PostAllResponseDto>> getAllPosts(){
+    public ResponseEntity<SuccessResponse<List<PostAllResponseDto>>> getAllPosts(){
         List<PostAllResponseDto> allPosts = postService.getAllPosts();
-        return ResponseEntity.ok(allPosts);
+        return ResponseEntity.ok(new SuccessResponse<>(allPosts));
     }
 
     @GetMapping("/posts/{id}")
-    public ResponseEntity<PostDetailResponseDto> getPostById(@PathVariable("id") Long id){
+    public ResponseEntity<SuccessResponse<PostDetailResponseDto>> getPostById(@PathVariable("id") Long id){
         PostDetailResponseDto postResponseDto = postService.getPostById(id);
-        return ResponseEntity.ok(postResponseDto);
+        return ResponseEntity.ok(new SuccessResponse<>(postResponseDto));
     }
 
     @DeleteMapping("/posts/{id}")
-    public ResponseEntity<SuccessResponse> deletePostById(@RequestHeader("id") Long userId, @PathVariable("id") Long id){
+    public ResponseEntity<SuccessResponse<String>> deletePostById(@RequestHeader("id") Long userId, @PathVariable("id") Long id){
         User user = userService.existsUser(userId);
-        SuccessResponse successResponse = postService.deletePostById(id, user);
-        return ResponseEntity.ok(successResponse);
+        String response = postService.deletePostById(id, user);
+        return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 
     @PatchMapping("/posts/{id}")
-    public ResponseEntity<SuccessResponse> updatePostTitle(@RequestHeader("id") Long userId, @PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
+    public ResponseEntity<SuccessResponse<String>> updatePostTitle(@RequestHeader("id") Long userId, @PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
         User user = userService.existsUser(userId);
-        SuccessResponse successResponse = postService.updatePostTitle(id, user, postRequestDto);
-        return ResponseEntity.ok(successResponse);
+        String response = postService.updatePostTitle(id, user, postRequestDto);
+        return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 
     @GetMapping("/posts/search")
-    public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
+    public ResponseEntity<SuccessResponse<List<Post>>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
         List<Post> posts = postService.searchPostsByKeyword(keywords);
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok(new SuccessResponse<>(posts));
     }
 }

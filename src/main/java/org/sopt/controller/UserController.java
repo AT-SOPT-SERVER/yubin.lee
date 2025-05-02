@@ -18,8 +18,8 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<SuccessResponse> createUser(@RequestBody UserCreateRequest userCreateRequest){
-        SuccessResponse successResponse = userService.saveUser(userCreateRequest);
-        return ResponseEntity.ok(successResponse);
+    public ResponseEntity<SuccessResponse<String>> createUser(@RequestBody UserCreateRequest userCreateRequest){
+        String successResponse = userService.saveUser(userCreateRequest);
+        return ResponseEntity.ok(new SuccessResponse<>(successResponse));
     }
 }
