@@ -18,4 +18,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByIdAndUser(Long id, User user);
     boolean existsByTitle(String title);
     Optional<Post> findTopByOrderByTimeDesc();
+    Optional<Post> findTopByUserOrderByTimeDesc(User user);
+
 }

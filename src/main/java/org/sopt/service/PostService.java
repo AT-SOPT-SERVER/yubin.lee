@@ -5,7 +5,6 @@ import org.sopt.domain.User;
 import org.sopt.dto.request.PostRequestDto;
 import org.sopt.dto.response.PostAllResponseDto;
 import org.sopt.dto.response.PostDetailResponseDto;
-import org.sopt.dto.response.SuccessResponse;
 import org.sopt.exception.CustomBadRequestException;
 import org.sopt.exception.CustomNotFoundException;
 import org.sopt.exception.ErrorCode;
@@ -17,16 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class PostService {
 
-    // postRepository 가져오기
     private final PostRepository postRepository;
     private final UserService userService;
-    private static final String NOT_FOUND_POST_MSG= "게시물이 존재하지 않습니다.";
-
 
     public PostService(PostRepository postRepository, UserService userService){
         this.postRepository = postRepository;
@@ -36,7 +31,7 @@ public class PostService {
     // 게시글 저장
     public String createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
         // 포스트 검증
-        canCreatePost(LocalDateTime.now());
+        canCreatePost(LocalDateTime.now(), user);
         duplicatePost(postRequestDto.title());
         // dto -> Entity 변환
         Post post = postRequestDto.toEntity(user);
@@ -90,8 +85,8 @@ public class PostService {
     }
 
     // 게시물 작성 3분으로 제한
-    private void canCreatePost(LocalDateTime now) {
-        postRepository.findTopByOrderByTimeDesc()
+    private void canCreatePost(LocalDateTime now, User user) {
+        postRepository.findTopByUserOrderByTimeDesc(user)
                 .ifPresent(lastPost -> {
                     if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
                         throw new CustomBadRequestException(ErrorCode.POST_CREATION_LIMIT);
