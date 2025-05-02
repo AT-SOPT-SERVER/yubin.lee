@@ -1,5 +1,7 @@
 package org.sopt.global;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sopt.dto.response.ErrorResponse;
 import org.sopt.exception.*;
 import org.springframework.http.ResponseEntity;
@@ -7,10 +9,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.NoSuchElementException;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // 400 - 잘못된 요청
     @ExceptionHandler(CustomBadRequestException.class)
@@ -54,6 +56,7 @@ public class GlobalExceptionHandler {
     // 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error(e.getMessage());
         return buildErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
