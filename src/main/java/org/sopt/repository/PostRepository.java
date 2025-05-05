@@ -12,10 +12,8 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    List<Post> findAll();
     List<Post> findByTitleContainingIgnoreCase(String keyword);
     List<Post> findByUserNameContainingIgnoreCase(String keyword);
-    Optional<Post> findById(Long id);
     boolean existsByTitle(String title);
     Optional<Post> findTopByUserOrderByTimeDesc(User user);
 }

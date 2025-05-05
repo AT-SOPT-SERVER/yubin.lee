@@ -19,7 +19,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Post> posts = new ArrayList<>();
 
-    public User() {}
+    protected User() {}
 
     public User(String name, String email){
         this.name = name;
