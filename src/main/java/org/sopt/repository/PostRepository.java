@@ -15,5 +15,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByTitleContainingIgnoreCase(String keyword);
     List<Post> findByUserNameContainingIgnoreCase(String keyword);
     boolean existsByTitle(String title);
-    Optional<Post> findTopByUserOrderByTimeDesc(User user);
+    boolean existsByTitleAndIdNot(String title, Long id);
+    Optional<Post> findTopByUserOrderByCreatedDateDesc(User user);
 }

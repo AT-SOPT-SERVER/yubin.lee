@@ -55,7 +55,7 @@ public class PostController {
     @PatchMapping("/{id}")
     public ResponseEntity<SuccessResponse<String>> updatePostTitle(@RequestHeader("id") Long userId, @PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
         User user = userService.existsUser(userId);
-        String response = postService.updatePostTitle(id, user, postRequestDto);
+        String response = postService.updatePosts(id, user, postRequestDto);
         return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 

@@ -32,7 +32,7 @@ public class PostService {
     public String createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
         // 포스트 검증
         canCreatePost(LocalDateTime.now(), user);
-        duplicatePost(postRequestDto.title());
+        duplicatePost(postRequestDto.title(), null);
         // dto -> Entity 변환
         Post post = postRequestDto.toEntity(user);
         // 저장
@@ -43,7 +43,7 @@ public class PostService {
     // 전체 게시글 조회 (최신순)
     @Transactional(readOnly = true)
     public List<PostAllResponseDto> getAllPosts(){
-        Sort sort = Sort.by(Sort.Direction.DESC, "time");
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
         return postRepository.findAll(sort).stream().map(PostAllResponseDto::from).toList();
     }
 
@@ -63,12 +63,12 @@ public class PostService {
 
     // 게시글 수정
     @Transactional
-    public String updatePostTitle(Long id, User user, PostRequestDto postRequestDto) {
+    public String updatePosts(Long id, User user, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
         userService.validatePostOwnership(post, user);
-        duplicatePost(postRequestDto.title());
-        post.setTitle(postRequestDto.title());
-        post.setContent(postRequestDto.content());
+        duplicatePost(postRequestDto.title(), id);
+        post.updateTitle(postRequestDto.title());
+        post.updateContent(postRequestDto.content());
         return "게시물 수정이 완료되었습니다.";
     }
 
@@ -82,17 +82,22 @@ public class PostService {
     }
 
     // 중복된 게시물
-    private void duplicatePost(String title){
-        if (postRepository.existsByTitle(title)){
+    private void duplicatePost(String title, Long id) {
+        boolean isDuplicate = (id == null)
+                ? postRepository.existsByTitle(title) // 생성 시
+                : postRepository.existsByTitleAndIdNot(title, id); // 수정 시
+
+        if (isDuplicate) {
             throw new CustomBadRequestException(ErrorCode.POST_DUPLICATED);
         }
     }
 
+
     // 게시물 작성 3분으로 제한
     private void canCreatePost(LocalDateTime now, User user) {
-        postRepository.findTopByUserOrderByTimeDesc(user)
+        postRepository.findTopByUserOrderByCreatedDateDesc(user)
                 .ifPresent(lastPost -> {
-                    if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
+                    if (Duration.between(lastPost.getCreatedDate(), now).toMinutes() < 3) {
                         throw new CustomBadRequestException(ErrorCode.POST_CREATION_LIMIT);
                     }
                 });

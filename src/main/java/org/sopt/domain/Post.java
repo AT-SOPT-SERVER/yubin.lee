@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import org.sopt.exception.CustomBadRequestException;
 import org.sopt.exception.ErrorCode;
 
-import java.time.LocalDateTime;
-
 @Entity
-public class Post {
+public class Post extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,8 +14,6 @@ public class Post {
     private String title;
 
     private String content;
-
-    private final LocalDateTime time = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -52,17 +48,12 @@ public class Post {
         return this.user;
     }
 
-    public LocalDateTime getTime(){
-        return this.time;
-    }
-
-    // Setter 구현
-    public void setTitle(String title){
+    public void updateTitle(String title){
         validateTitle(title);
         this.title = title;
     }
 
-    public void setContent(String content){
+    public void updateContent(String content){
         validateContent(content);
         this.content = content;
     }
