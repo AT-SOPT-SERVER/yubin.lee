@@ -1,14 +1,11 @@
 package org.sopt.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
+import org.sopt.exception.CustomBadRequestException;
+import org.sopt.exception.ErrorCode;
 
 @Entity
-public class Post {
+public class Post extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,15 +13,22 @@ public class Post {
 
     private String title;
 
-    private final LocalDateTime time = LocalDateTime.now();
+    private String content;
 
-    public Post(){
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    protected Post(){
 
     }
 
-    public Post(String title){
+    public Post(User user, String title, String content){
         validateTitle(title);
+        validateContent(content);
+        this.user = user;
         this.title = title;
+        this.content = content;
     }
 
     // Getter 구현
@@ -36,23 +40,38 @@ public class Post {
         return this.title;
     }
 
-    public LocalDateTime getTime(){
-        return this.time;
+    public String getContent(){
+        return this.content;
     }
 
-    // Setter 구현
-    public void setTitle(String title){
+    public User getUser(){
+        return this.user;
+    }
+
+    public void updateTitle(String title){
         validateTitle(title);
         this.title = title;
     }
 
+    public void updateContent(String content){
+        validateContent(content);
+        this.content = content;
+    }
+
     private void validateTitle(String title){
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("❌ 제목을 입력해야 합니다.");
+            throw new CustomBadRequestException(ErrorCode.EMPTY_TITLE);
         }
         if (title.length() > 30){
-            throw new IllegalArgumentException("❌ 제목은 30자 이하여야 합니다.");
+            throw new CustomBadRequestException(ErrorCode.TITLE_TOO_LONG);
         }
     }
+
+    private void validateContent(String content){
+        if (content == null || content.trim().isEmpty()){
+            throw new CustomBadRequestException(ErrorCode.EMPTY_CONTENT);
+        }
+    }
+
 
 }

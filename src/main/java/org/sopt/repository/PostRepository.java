@@ -1,6 +1,7 @@
 package org.sopt.repository;
 
 import org.sopt.domain.Post;
+import org.sopt.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,9 +12,9 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    List<Post> findAll();
     List<Post> findByTitleContainingIgnoreCase(String keyword);
-    Optional<Post> findById(Long id);
+    List<Post> findByUserNameContainingIgnoreCase(String keyword);
     boolean existsByTitle(String title);
-    Optional<Post> findTopByOrderByTimeDesc();
+    boolean existsByTitleAndIdNot(String title, Long id);
+    Optional<Post> findTopByUserOrderByCreatedDateDesc(User user);
 }

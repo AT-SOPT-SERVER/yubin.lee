@@ -2,55 +2,66 @@ package org.sopt.controller;
 
 import jakarta.validation.Valid;
 import org.sopt.domain.Post;
+import org.sopt.domain.User;
 import org.sopt.dto.request.PostRequestDto;
-import org.sopt.dto.response.PostResponseDto;
+import org.sopt.dto.response.PostAllResponseDto;
+import org.sopt.dto.response.PostDetailResponseDto;
+import org.sopt.dto.response.SuccessResponse;
 import org.sopt.service.PostService;
+import org.sopt.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
+    private final UserService userService;
 
-    public PostController(PostService postService){
+    public PostController(PostService postService, UserService userService){
         this.postService = postService;
+        this.userService = userService;
     }
 
-    @PostMapping("/posts")
-    public ResponseEntity<String> createPost(@RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.createPost(postRequestDto.title());
-        return ResponseEntity.ok("게시물이 저장되었습니다.");
+    @PostMapping
+    public ResponseEntity<SuccessResponse<String>> createPost(@RequestHeader("id") Long userId, @RequestBody @Valid final PostRequestDto postRequestDto){
+        User user = userService.existsUser(userId);
+        String response = postService.createPost(user, postRequestDto);
+        return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 
-    @GetMapping("/posts")
-    public ResponseEntity<List<Post>> getAllPosts(){
-        return ResponseEntity.ok(postService.getAllPosts());
+    @GetMapping
+    public ResponseEntity<SuccessResponse<List<PostAllResponseDto>>> getAllPosts(){
+        List<PostAllResponseDto> allPosts = postService.getAllPosts();
+        return ResponseEntity.ok(new SuccessResponse<>(allPosts));
     }
 
-    @GetMapping("/posts/{id}")
-    public ResponseEntity<PostResponseDto> getPostById(@PathVariable("id") Long id){
-        PostResponseDto postResponseDto = postService.getPostById(id);
-        return ResponseEntity.ok(postResponseDto);
+    @GetMapping("/{id}")
+    public ResponseEntity<SuccessResponse<PostDetailResponseDto>> getPostById(@PathVariable("id") Long id){
+        PostDetailResponseDto postResponseDto = postService.getPostById(id);
+        return ResponseEntity.ok(new SuccessResponse<>(postResponseDto));
     }
 
-    @DeleteMapping("/posts/{id}")
-    public ResponseEntity<String> deletePostById(@PathVariable("id") Long id){
-        postService.deletePostById(id);
-        return ResponseEntity.ok("게시물 삭제가 완료되었습니다.");
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessResponse<String>> deletePostById(@RequestHeader("id") Long userId, @PathVariable("id") Long id){
+        User user = userService.existsUser(userId);
+        String response = postService.deletePostById(id, user);
+        return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 
-    @PatchMapping("/posts/{id}")
-    public ResponseEntity<String> updatePostTitle(@PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
-        postService.updatePostTitle(id, postRequestDto.title());
-        return ResponseEntity.ok("게시물 수정이 완료되었습니다.");
+    @PatchMapping("/{id}")
+    public ResponseEntity<SuccessResponse<String>> updatePostTitle(@RequestHeader("id") Long userId, @PathVariable("id") Long id, @RequestBody @Valid final PostRequestDto postRequestDto){
+        User user = userService.existsUser(userId);
+        String response = postService.updatePosts(id, user, postRequestDto);
+        return ResponseEntity.ok(new SuccessResponse<>(response));
     }
 
-    @GetMapping("/posts/search")
-    public ResponseEntity<List<Post>> searchPostsByKeyword(@RequestParam("keywords") String keywords){
-        List<Post> posts = postService.searchPostsByKeyword(keywords);
-        return ResponseEntity.ok(posts);
+    @GetMapping("/search")
+    public ResponseEntity<SuccessResponse<List<Post>>> searchPostsByKeyword(@RequestParam("category") String category, @RequestParam("keyword") String keywords){
+        List<Post> posts = postService.searchPosts(keywords, category);
+        return ResponseEntity.ok(new SuccessResponse<>(posts));
     }
 }
