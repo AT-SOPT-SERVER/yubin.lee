@@ -1,79 +1,104 @@
 package org.sopt.service;
 
 import org.sopt.domain.Post;
-import org.sopt.dto.response.PostResponseDto;
+import org.sopt.domain.User;
+import org.sopt.dto.request.PostRequestDto;
+import org.sopt.dto.response.PostAllResponseDto;
+import org.sopt.dto.response.PostDetailResponseDto;
+import org.sopt.exception.CustomBadRequestException;
+import org.sopt.exception.CustomNotFoundException;
+import org.sopt.exception.ErrorCode;
 import org.sopt.repository.PostRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class PostService {
 
-    // postRepository 가져오기
     private final PostRepository postRepository;
-    private static final String NOT_FOUND_MSG= "게시물이 존재하지 않습니다.";
+    private final UserService userService;
 
-    public PostService(PostRepository postRepository){
+    public PostService(PostRepository postRepository, UserService userService){
         this.postRepository = postRepository;
+        this.userService = userService;
     }
 
     // 게시글 저장
-    public void createPost(String title) throws IllegalArgumentException{
-        canCreatePost(LocalDateTime.now());
-        duplicatePost(title);
-        Post post = new Post(title);
+    public String createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
+        // 포스트 검증
+        canCreatePost(LocalDateTime.now(), user);
+        duplicatePost(postRequestDto.title(), null);
+        // dto -> Entity 변환
+        Post post = postRequestDto.toEntity(user);
+        // 저장
         postRepository.save(post);
+        return "게시물이 저장되었습니다.";
     }
 
-    // 전체 게시글 조회
-    public List<Post> getAllPosts(){
-        return postRepository.findAll();
+    // 전체 게시글 조회 (최신순)
+    @Transactional(readOnly = true)
+    public List<PostAllResponseDto> getAllPosts(){
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
+        return postRepository.findAll(sort).stream().map(PostAllResponseDto::from).toList();
     }
 
     // 게시글 상세 조회
-    public PostResponseDto getPostById(Long id){
-        Post post = postRepository.findById(id).orElseThrow(()-> new NoSuchElementException(NOT_FOUND_MSG));
-        return PostResponseDto.from(post);
+    public PostDetailResponseDto getPostById(Long id){
+        Post post = postRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        return PostDetailResponseDto.from(post);
     }
 
     // 게시글 삭제
-    public void deletePostById(Long id){
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
+    public String deletePostById(Long id, User user) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        userService.validatePostOwnership(post, user);
         postRepository.delete(post);
+        return "게시물이 삭제되었습니다.";
     }
 
     // 게시글 수정
-    @Transactional // 해당 어노테이션을 붙이지 않으면 자동으로 수정이 안됨
-    public void updatePostTitle(Long id, String title) {
-        duplicatePost(title);
-        Post post = postRepository.findById(id).orElseThrow(() -> new NoSuchElementException(NOT_FOUND_MSG));
-        post.setTitle(title);
+    @Transactional
+    public String updatePosts(Long id, User user, PostRequestDto postRequestDto) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        userService.validatePostOwnership(post, user);
+        duplicatePost(postRequestDto.title(), id);
+        post.updateTitle(postRequestDto.title());
+        post.updateContent(postRequestDto.content());
+        return "게시물 수정이 완료되었습니다.";
     }
 
-    // 게시글 찾기
-    public List<Post> searchPostsByKeyword(String keyword) {
-        return postRepository.findByTitleContainingIgnoreCase(keyword);
+    // 카테고리별 게시물 검색
+    public List<Post> searchPosts(String keyword, String category) {
+        return switch (category.toLowerCase()) {
+            case "title" -> postRepository.findByTitleContainingIgnoreCase(keyword);
+            case "author" -> postRepository.findByUserNameContainingIgnoreCase(keyword);
+            default -> throw new CustomBadRequestException(ErrorCode.INVALID_INPUT_VALUE);
+        };
     }
 
     // 중복된 게시물
-    private void duplicatePost(String title){
-        if (postRepository.existsByTitle(title)){
-            throw new IllegalArgumentException("게시물이 이미 존재합니다.");
+    private void duplicatePost(String title, Long id) {
+        boolean isDuplicate = (id == null)
+                ? postRepository.existsByTitle(title) // 생성 시
+                : postRepository.existsByTitleAndIdNot(title, id); // 수정 시
+
+        if (isDuplicate) {
+            throw new CustomBadRequestException(ErrorCode.POST_DUPLICATED);
         }
     }
 
+
     // 게시물 작성 3분으로 제한
-    private void canCreatePost(LocalDateTime now) {
-        postRepository.findTopByOrderByTimeDesc()
+    private void canCreatePost(LocalDateTime now, User user) {
+        postRepository.findTopByUserOrderByCreatedDateDesc(user)
                 .ifPresent(lastPost -> {
-                    if (Duration.between(lastPost.getTime(), now).toMinutes() < 3) {
-                        throw new IllegalArgumentException("게시물 작성은 3분 뒤에 가능합니다.");
+                    if (Duration.between(lastPost.getCreatedDate(), now).toMinutes() < 3) {
+                        throw new CustomBadRequestException(ErrorCode.POST_CREATION_LIMIT);
                     }
                 });
     }
