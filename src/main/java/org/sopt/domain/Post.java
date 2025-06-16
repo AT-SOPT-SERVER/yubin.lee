@@ -1,10 +1,18 @@
 package org.sopt.domain;
 
 import jakarta.persistence.*;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.sopt.exception.CustomBadRequestException;
 import org.sopt.exception.ErrorCode;
 
+import java.util.List;
+
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Post extends BaseTimeEntity{
 
     @Id
@@ -13,15 +21,15 @@ public class Post extends BaseTimeEntity{
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    protected Post(){
-
-    }
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
     public Post(User user, String title, String content){
         validateTitle(title);
@@ -29,23 +37,6 @@ public class Post extends BaseTimeEntity{
         this.user = user;
         this.title = title;
         this.content = content;
-    }
-
-    // Getter 구현
-    public Long getId(){
-        return id;
-    }
-
-    public String getTitle(){
-        return this.title;
-    }
-
-    public String getContent(){
-        return this.content;
-    }
-
-    public User getUser(){
-        return this.user;
     }
 
     public void updateTitle(String title){

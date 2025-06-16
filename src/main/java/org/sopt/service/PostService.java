@@ -1,5 +1,6 @@
 package org.sopt.service;
 
+import lombok.RequiredArgsConstructor;
 import org.sopt.domain.Post;
 import org.sopt.domain.User;
 import org.sopt.dto.request.PostRequestDto;
@@ -18,26 +19,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
 
-    public PostService(PostRepository postRepository, UserService userService){
-        this.postRepository = postRepository;
-        this.userService = userService;
-    }
-
     // 게시글 저장
-    public String createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
+    public void createPost(User user, PostRequestDto postRequestDto) throws IllegalArgumentException{
         // 포스트 검증
         canCreatePost(LocalDateTime.now(), user);
         duplicatePost(postRequestDto.title(), null);
         // dto -> Entity 변환
-        Post post = postRequestDto.toEntity(user);
+        Post post = postRequestDto.from(user);
         // 저장
         postRepository.save(post);
-        return "게시물이 저장되었습니다.";
     }
 
     // 전체 게시글 조회 (최신순)
@@ -49,27 +45,25 @@ public class PostService {
 
     // 게시글 상세 조회
     public PostDetailResponseDto getPostById(Long id){
-        Post post = postRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        Post post = postRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(ErrorCode.NOT_FOUND_POST));
         return PostDetailResponseDto.from(post);
     }
 
     // 게시글 삭제
-    public String deletePostById(Long id, User user) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    public void deletePostById(Long id, User user) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_POST));
         userService.validatePostOwnership(post, user);
         postRepository.delete(post);
-        return "게시물이 삭제되었습니다.";
     }
 
     // 게시글 수정
     @Transactional
-    public String updatePosts(Long id, User user, PostRequestDto postRequestDto) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    public void updatePosts(Long id, User user, PostRequestDto postRequestDto) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_POST));
         userService.validatePostOwnership(post, user);
         duplicatePost(postRequestDto.title(), id);
         post.updateTitle(postRequestDto.title());
         post.updateContent(postRequestDto.content());
-        return "게시물 수정이 완료되었습니다.";
     }
 
     // 카테고리별 게시물 검색

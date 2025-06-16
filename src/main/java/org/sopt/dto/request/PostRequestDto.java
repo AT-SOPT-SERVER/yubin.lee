@@ -13,7 +13,7 @@ public record PostRequestDto(
         @Size(max = 1000, message = "내용은 1000자 이하여야 합니다.")
         String content
 ) {
-        public Post toEntity(User user){
+        public Post from(User user){
                 return new Post(user, this.title, this.content());
         }
 }

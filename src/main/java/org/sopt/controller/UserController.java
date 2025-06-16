@@ -21,7 +21,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<String>> createUser(@RequestBody UserCreateRequest userCreateRequest){
-        String successResponse = userService.saveUser(userCreateRequest);
-        return ResponseEntity.ok(new SuccessResponse<>(successResponse));
+        userService.saveUser(userCreateRequest);
+        return ResponseEntity.ok(new SuccessResponse<>(ResponseMessage.CREATE_USER_SUCCESS.getMessage()));
     }
 }

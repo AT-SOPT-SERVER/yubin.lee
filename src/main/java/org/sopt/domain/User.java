@@ -1,11 +1,16 @@
 package org.sopt.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class User {
 
     @Id
@@ -16,21 +21,17 @@ public class User {
 
     private String email;
 
-    @OneToMany(mappedBy = "user")
-    private List<Post> posts = new ArrayList<>();
+    private String password;
 
-    protected User() {}
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Post> posts;
+
+    @OneToMany(mappedBy = "user")
+    private List<Comment> comments;
 
     public User(String name, String email){
         this.name = name;
         this.email = email;
     }
 
-    public Long getId(){
-        return this.id;
-    }
-
-    public String getName(){
-        return this.name;
-    }
 }
