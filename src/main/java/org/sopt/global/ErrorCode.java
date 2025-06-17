@@ -22,9 +22,13 @@ public enum ErrorCode {
     POST_WRITE_DENIED(HttpStatus.FORBIDDEN.value(),"U003", "게시물 쓰기 권한이 없습니다."),
     COMMENT_WRITE_DENIED(HttpStatus.FORBIDDEN.value(), "U004", "댓글 쓰기 권한이 없습니다."),
     COMMENT_DELETE_DENIED(HttpStatus.FORBIDDEN.value(), "U005", "댓글 삭제 권한이 없습니다."),
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND.value(), "U006", "유저를 찾을 수 없습니다."),
 
     // COMMENT
-    NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND.value(), "C001", "댓글을 찾을 수 없습니다.");
+    NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND.value(), "C001", "댓글을 찾을 수 없습니다."),
+    // LIKE
+    NOT_FOUND_POST_LIKE(HttpStatus.NOT_FOUND.value(), "L001", "게시물 좋아요 기록을 찾을 수 없습니다."),
+    ALREADY_LIKED_POST(HttpStatus.BAD_REQUEST.value(), "L002", "이미 좋아요를 눌렀습니다.");
 
     private final int status;
     private final String code;

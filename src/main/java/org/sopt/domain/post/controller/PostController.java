@@ -2,6 +2,8 @@ package org.sopt.domain.post.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sopt.domain.like.dto.response.UsersWhoLikedPostDto;
+import org.sopt.domain.post.service.PostLikeService;
 import org.sopt.global.ResponseMessage;
 import org.sopt.domain.post.model.Post;
 import org.sopt.domain.user.model.User;
@@ -27,6 +29,7 @@ public class PostController {
     private final PostService postService;
     private final UserService userService;
     private final CommentService commentService;
+    private final PostLikeService postLikeService;
 
     @PostMapping
     public ResponseEntity<SuccessResponse<String>> createPost(
@@ -109,14 +112,58 @@ public class PostController {
     }
 
     // 좋아요 기능
+    // 게시물 좋아요 개수 조회
     @GetMapping("/{postId}/likes")
-    public ResponseEntity<SuccessResponse<String>> getLikes(@RequestHeader("userId") long userId,
+    public ResponseEntity<SuccessResponse<Long>> getPostLikes(@RequestHeader("userId") long userId,
                                                             @PathVariable("postId") long postId){
+        long counts = postLikeService.countPostLikes(postId);
+        return ResponseEntity.ok(new SuccessResponse<>(counts));
+    }
+
+    // 게시물 좋아요 등록
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<SuccessResponse<String>> addPostLike(@RequestHeader("userId") long userId,
+                                                                @PathVariable("postId") long postId){
+        postLikeService.addPostLike(userId, postId);
+        return ResponseEntity.ok(new SuccessResponse<>(ResponseMessage.CREATE_POSTLIKE_SUCCESS.getMessage()));
+    }
+
+    // 게시물 좋아요 취소
+    @DeleteMapping("/{postId}/likes")
+    public ResponseEntity<SuccessResponse<String>> deletePostLike(@RequestHeader("userId") long userId,
+                                                                  @PathVariable("postId") long postId){
+        postLikeService.removePostLike(userId, postId);
+        return ResponseEntity.ok(new SuccessResponse<>(ResponseMessage.CANCEL_POSTLIKE_SUCCESS.getMessage()));
+    }
+
+    // 게시물 좋아요 누른 유저 목록 반환
+    @GetMapping("/{postId}/likes/users")
+    public ResponseEntity<SuccessResponse<List<UsersWhoLikedPostDto>>> getLikedPostsUserList(@RequestHeader("userId") long userId,
+                                                                                             @PathVariable("postId") long postId){
+        List<UsersWhoLikedPostDto> users = postLikeService.getUsersWhoLikedPost(postId);
+        return ResponseEntity.ok(new SuccessResponse<>(users));
+    }
+
+
+    // 댓글 좋아요 개수 조회
+    @GetMapping("/{postId}/comments/{commentId}/likes")
+    public ResponseEntity<SuccessResponse<String>> getPostCommentLikes(@RequestHeader("userId") long userId,
+                                                                         @PathVariable("postId") long postId,
+                                                                         @PathVariable("commentId") long commentId){
         return ResponseEntity.ok(new SuccessResponse<>(""));
     }
 
-    @GetMapping("/{postId}/comments/{commentId}/likes")
-    public ResponseEntity<SuccessResponse<String>> createPostCommentLike(@RequestHeader("userId") long userId,
+    // 댓글 좋아요 등록
+    @PostMapping("/{postId}/comments/{commentId}/likes")
+    public ResponseEntity<SuccessResponse<String>> addPostCommentLike(@RequestHeader("userId") long userId,
+                                                                      @PathVariable("postId") long postId,
+                                                                      @PathVariable("commentId") long commentId){
+        return ResponseEntity.ok(new SuccessResponse<>(""));
+    }
+
+    // 댓글 좋아요 취소
+    @DeleteMapping("/{postId}/comments/{commentId}/likes")
+    public ResponseEntity<SuccessResponse<String>> deletePostCommentLike(@RequestHeader("userId") long userId,
                                                                          @PathVariable("postId") long postId,
                                                                          @PathVariable("commentId") long commentId){
         return ResponseEntity.ok(new SuccessResponse<>(""));

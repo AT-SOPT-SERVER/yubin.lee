@@ -12,7 +12,9 @@ public enum ResponseMessage {
     CREATE_USER_SUCCESS("회원가입이 완료되었습니다."),
     CREATE_COMMENT_SUCCESS("댓글이 등록되었습니다."),
     UPDATE_COMMENT_SUCCESS("댓글이 수정되었습니다."),
-    DELETE_COMMENT_SUCCESS("댓글이 삭제되었습니다.");
+    DELETE_COMMENT_SUCCESS("댓글이 삭제되었습니다."),
+    CREATE_POSTLIKE_SUCCESS("게시물 좋아요가 등록되었습니다."),
+    CANCEL_POSTLIKE_SUCCESS("게시물 좋아요가 취소되었습니다."),;
 
     private final String message;
 }
