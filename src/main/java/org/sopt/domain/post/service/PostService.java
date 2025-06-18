@@ -5,12 +5,15 @@ import org.sopt.domain.post.model.Post;
 import org.sopt.domain.user.model.User;
 import org.sopt.domain.user.service.UserService;
 import org.sopt.domain.post.dto.request.PostRequestDto;
-import org.sopt.domain.post.dto.response.PostAllResponseDto;
+import org.sopt.domain.post.dto.response.PostListsDto;
 import org.sopt.domain.post.dto.response.PostDetailResponseDto;
 import org.sopt.global.exception.CustomBadRequestException;
 import org.sopt.global.exception.CustomNotFoundException;
 import org.sopt.global.ErrorCode;
 import org.sopt.domain.post.repository.PostRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,9 +42,10 @@ public class PostService {
 
     // 전체 게시글 조회 (최신순)
     @Transactional(readOnly = true)
-    public List<PostAllResponseDto> getAllPosts(){
+    public Page<PostListsDto> getAllPosts(int pageNumber, int pageSize){
         Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
-        return postRepository.findAll(sort).stream().map(PostAllResponseDto::from).toList();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return postRepository.findAll(pageable).map(PostListsDto::from);
     }
 
     // 게시글 상세 조회
@@ -68,11 +72,17 @@ public class PostService {
     }
 
     // 카테고리별 게시물 검색
-    public List<Post> searchPosts(String keyword, String category) {
+    public Page<PostListsDto> searchPosts(String keyword, String category, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return switch (category.toLowerCase()) {
-            case "title" -> postRepository.findByTitleContainingIgnoreCase(keyword);
-            case "author" -> postRepository.findByUserNameContainingIgnoreCase(keyword);
-            default -> throw new CustomBadRequestException(ErrorCode.INVALID_INPUT_VALUE);
+            case "title" ->
+                    postRepository.findByTitleContainingIgnoreCase(keyword, pageable)
+                    .map(PostListsDto::from);
+            case "author" ->
+                    postRepository.findByUserNameContainingIgnoreCase(keyword, pageable)
+                    .map(PostListsDto::from);
+            default ->
+                    throw new CustomBadRequestException(ErrorCode.INVALID_INPUT_VALUE);
         };
     }
 
@@ -97,7 +107,5 @@ public class PostService {
                     }
                 });
     }
-
-    // 좋아요 기능
 
 }

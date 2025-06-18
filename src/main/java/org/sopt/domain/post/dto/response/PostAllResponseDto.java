@@ -1,16 +1,19 @@
 package org.sopt.domain.post.dto.response;
 
-import org.sopt.domain.post.model.Post;
+import lombok.Builder;
+import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
+@Builder
 public record PostAllResponseDto(
-        Long id,
-        String title,
-        String userName,
-        LocalDateTime createdAt
+        List<PostListsDto> posts,
+        PageableDto pageable
 ) {
-    public static PostAllResponseDto from(Post post) {
-        return new PostAllResponseDto(post.getId(), post.getTitle(), post.getUser().getName(), post.getCreatedDate());
+    public static PostAllResponseDto of(Page<PostListsDto> postListsDto) {
+        return PostAllResponseDto.builder()
+                .posts(postListsDto.getContent())
+                .pageable(PageableDto.of(postListsDto))
+                .build();
     }
 }
