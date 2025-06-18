@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.sopt.domain.post.model.PostComment;
+import org.sopt.domain.comment.domain.PostComment;
 import org.sopt.domain.post.model.Post;
 
 import java.util.List;

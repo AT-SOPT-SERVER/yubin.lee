@@ -1,4 +1,4 @@
-package org.sopt.domain.post.dto.request;
+package org.sopt.domain.comment.dto.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.Builder;

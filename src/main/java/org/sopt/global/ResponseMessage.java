@@ -14,7 +14,9 @@ public enum ResponseMessage {
     UPDATE_COMMENT_SUCCESS("댓글이 수정되었습니다."),
     DELETE_COMMENT_SUCCESS("댓글이 삭제되었습니다."),
     CREATE_POSTLIKE_SUCCESS("게시물 좋아요가 등록되었습니다."),
-    CANCEL_POSTLIKE_SUCCESS("게시물 좋아요가 취소되었습니다."),;
+    CANCEL_POSTLIKE_SUCCESS("게시물 좋아요가 취소되었습니다."),
+    CREATE_POST_COMMENT_LIKE_SUCCESS("댓글 좋아요가 등록되었습니다."),
+    CANCEL_POST_COMMENT_LIKE_SUCCESS("댓글 좋아요가 취소되었습니다.");
 
     private final String message;
 }

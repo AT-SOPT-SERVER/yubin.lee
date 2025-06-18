@@ -13,6 +13,13 @@ public record PostDetailResponseDto(
         LocalDateTime modifiedAt
 ) {
     public static PostDetailResponseDto from(Post post){
-        return new PostDetailResponseDto(post.getId(), post.getTitle(), post.getContent(), post.getUser().getName(), post.getCreatedDate(), post.getModifiedDate());
+        return new PostDetailResponseDto(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getUser().getName(),
+                post.getCreatedDate(),
+                post.getModifiedDate()
+        );
     }
 }

@@ -1,7 +1,7 @@
-package org.sopt.domain.post.dto.response;
+package org.sopt.domain.comment.dto.response;
 
 import lombok.Builder;
-import org.sopt.domain.post.model.PostComment;
+import org.sopt.domain.comment.domain.PostComment;
 
 import java.time.LocalDateTime;
 

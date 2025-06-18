@@ -1,7 +1,9 @@
 package org.sopt.global.dto;
 
-public record SuccessResponse<T>(Boolean success, T data) {
+import org.springframework.http.HttpStatus;
+
+public record SuccessResponse<T>(int code, T data) {
     public SuccessResponse(T data){
-        this(true, data);
+        this(HttpStatus.OK.value(), data);
     }
 }

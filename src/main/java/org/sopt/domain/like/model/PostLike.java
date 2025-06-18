@@ -1,10 +1,7 @@
 package org.sopt.domain.like.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.sopt.domain.post.model.Post;
 import org.sopt.domain.user.model.User;
 import org.sopt.global.BaseTimeEntity;
@@ -19,6 +16,7 @@ import org.sopt.global.BaseTimeEntity;
                 @UniqueConstraint(name = "uk_user_post", columnNames = {"user_id", "post_id"})
         }
 )
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class PostLike extends BaseTimeEntity {

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sopt.domain.comment.domain.PostComment;
 import org.sopt.global.BaseTimeEntity;
 import org.sopt.domain.like.model.PostLike;
 import org.sopt.domain.user.model.User;

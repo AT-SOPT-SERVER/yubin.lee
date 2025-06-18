@@ -1,10 +1,8 @@
 package org.sopt.domain.like.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.sopt.domain.post.model.PostComment;
+import lombok.*;
+import org.sopt.domain.comment.domain.PostComment;
 import org.sopt.domain.user.model.User;
 import org.sopt.global.BaseTimeEntity;
 
@@ -17,6 +15,8 @@ import org.sopt.global.BaseTimeEntity;
                 @UniqueConstraint(name = "uk_user_post", columnNames = {"user_id", "post_comment_id"})
         }
 )
+@Builder
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class PostCommentLike extends BaseTimeEntity {

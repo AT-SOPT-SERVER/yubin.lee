@@ -1,4 +1,4 @@
-package org.sopt.domain.post.service;
+package org.sopt.domain.like.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.like.dto.response.UsersWhoLikedPostDto;
@@ -33,7 +33,7 @@ public class PostLikeService {
                 .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_POST));
 
         if (postLikeRepository.existsByUserIdAndPostId(userId, postId)) {
-            throw new CustomBadRequestException(ErrorCode.ALREADY_LIKED_POST);
+            throw new CustomBadRequestException(ErrorCode.ALREADY_LIKED);
         }
 
         PostLike postLike = PostLike.builder()

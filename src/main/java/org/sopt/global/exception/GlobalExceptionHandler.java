@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
             }
         }
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
-        ErrorResponse errorResponse = new ErrorResponse(false, errorCode.getStatus(), errorCode.getCode(), message);
+        ErrorResponse errorResponse = new ErrorResponse(false, errorCode.getStatus(), message);
         return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
     }
 
