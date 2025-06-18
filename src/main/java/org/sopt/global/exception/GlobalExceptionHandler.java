@@ -3,7 +3,7 @@ package org.sopt.global.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sopt.global.ErrorCode;
-import org.sopt.global.dto.ErrorResponse;
+import org.sopt.global.dto.response.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
             }
         }
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
-        ErrorResponse errorResponse = new ErrorResponse(false, errorCode.getStatus(), message);
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getStatus(), message);
         return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
     }
 

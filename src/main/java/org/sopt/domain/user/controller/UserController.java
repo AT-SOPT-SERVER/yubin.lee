@@ -2,9 +2,8 @@ package org.sopt.domain.user.controller;
 
 import org.sopt.domain.user.dto.request.UserCreateRequest;
 import org.sopt.global.ResponseMessage;
-import org.sopt.global.dto.SuccessResponse;
+import org.sopt.global.dto.response.SuccessResponse;
 import org.sopt.domain.user.service.UserService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +20,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessResponse<String>> createUser(@RequestBody UserCreateRequest userCreateRequest){
+    public SuccessResponse<String> createUser(@RequestBody UserCreateRequest userCreateRequest){
         userService.saveUser(userCreateRequest);
-        return ResponseEntity.ok(new SuccessResponse<>(ResponseMessage.CREATE_USER_SUCCESS.getMessage()));
+        return new SuccessResponse<>(ResponseMessage.CREATE_USER_SUCCESS.getMessage());
     }
 }

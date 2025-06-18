@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ResponseMessage {
+
     CREATE_POST_SUCCESS("게시물이 저장되었습니다."),
     DELETE_POST_SUCCESS("게시물이 삭제되었습니다."),
     UPDATE_POST_SUCCESS("게시물이 수정되었습니다."),

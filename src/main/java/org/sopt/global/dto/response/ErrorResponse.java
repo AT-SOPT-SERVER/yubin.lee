@@ -1,4 +1,4 @@
-package org.sopt.global.dto;
+package org.sopt.global.dto.response;
 
 import org.sopt.global.ErrorCode;
 
