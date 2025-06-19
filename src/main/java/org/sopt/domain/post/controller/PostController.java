@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.post.dto.response.PostAllResponseDto;
 import org.sopt.global.ResponseMessage;
-import org.sopt.domain.post.model.Post;
 import org.sopt.domain.user.model.User;
 import org.sopt.domain.post.dto.request.PostRequestDto;
 import org.sopt.domain.post.dto.response.PostListsDto;
@@ -14,8 +13,6 @@ import org.sopt.domain.post.service.PostService;
 import org.sopt.domain.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
