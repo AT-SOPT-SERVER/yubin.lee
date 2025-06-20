@@ -2,8 +2,10 @@ package org.sopt.domain.like.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.like.service.PostCommentLikeService;
-import org.sopt.global.ResponseMessage;
+import org.sopt.domain.user.dto.jwt.UserDetails;
+import org.sopt.global.enums.ResponseMessage;
 import org.sopt.global.dto.response.SuccessResponse;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,20 +18,20 @@ public class PostCommentLikeController {
     @GetMapping
     public SuccessResponse<Long> getPostCommentLikes(@PathVariable("commentId") long commentId){
         long count = postCommentLikeService.countPostCommentLikes(commentId);
-        return new SuccessResponse<>(count);
+        return new SuccessResponse<>(ResponseMessage.COUNT_COMMENT_LIKE_SUCCESS.getMessage(), count);
     }
 
     @PostMapping
-    public SuccessResponse<String> addPostCommentLike(@RequestHeader("userId") long userId,
+    public SuccessResponse<String> addPostCommentLike(@AuthenticationPrincipal UserDetails userDetails,
                                                                       @PathVariable("commentId") long commentId){
-        postCommentLikeService.addPostCommentLike(userId, commentId);
+        postCommentLikeService.addPostCommentLike(userDetails.userId(), commentId);
         return new SuccessResponse<>(ResponseMessage.CREATE_POST_COMMENT_LIKE_SUCCESS.getMessage());
     }
 
     @DeleteMapping
-    public SuccessResponse<String> deletePostCommentLike(@RequestHeader("userId") long userId,
+    public SuccessResponse<String> deletePostCommentLike(@AuthenticationPrincipal UserDetails userDetails,
                                                                          @PathVariable("commentId") long commentId){
-        postCommentLikeService.removePostCommentLike(userId, commentId);
+        postCommentLikeService.removePostCommentLike(userDetails.userId(), commentId);
         return new SuccessResponse<>(ResponseMessage.CANCEL_POST_COMMENT_LIKE_SUCCESS.getMessage());
     }
 }

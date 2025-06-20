@@ -1,15 +1,17 @@
 package org.sopt.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sopt.domain.user.dto.jwt.CustomUser;
+import org.sopt.domain.user.dto.jwt.UserDetails;
 import org.sopt.domain.user.dto.jwt.ValidatedTokenResult;
 import org.sopt.domain.user.dto.response.TokenDto;
-import org.sopt.domain.user.model.RefreshToken;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.user.domain.BlacklistedToken;
+import org.sopt.domain.user.domain.RefreshToken;
+import org.sopt.domain.user.domain.User;
+import org.sopt.domain.user.repository.BlackListedTokenRepository;
 import org.sopt.domain.user.repository.RefreshTokenRepository;
 import org.sopt.domain.user.security.JwtAuthentication;
 import org.sopt.domain.user.security.JwtProvider;
-import org.sopt.global.ErrorCode;
+import org.sopt.global.enums.ErrorCode;
 import org.sopt.global.exception.UnauthenticatedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,14 +19,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
-class TokenService {
+@RequiredArgsConstructor
+public class TokenService {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final BlackListedTokenRepository blackListedTokenRepository;
 
     @Transactional
     public TokenDto generateAndSaveToken(User user) {
@@ -32,7 +36,7 @@ class TokenService {
                 new SimpleGrantedAuthority(user.getRole().name())
         );
 
-        CustomUser principal = CustomUser.from(user);
+        UserDetails principal = UserDetails.from(user);
         Authentication authentication = new JwtAuthentication(principal, null, authorities);
 
         TokenDto tokenDto = jwtProvider.generateToken(authentication);
@@ -50,12 +54,16 @@ class TokenService {
         refreshTokenRepository.save(token);
     }
 
-    public ValidatedTokenResult validateRefreshToken(String accessToken, String refreshToken) {
+    public ValidatedTokenResult validateRefreshToken(String refreshToken) {
+        if (isBlacklisted(refreshToken)) {
+            throw new UnauthenticatedException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
         if (!jwtProvider.validateToken(refreshToken)){
             throw new UnauthenticatedException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        Authentication authentication = jwtProvider.getAuthentication(accessToken);
+        Authentication authentication = jwtProvider.getAuthentication(refreshToken);
 
         RefreshToken savedToken = refreshTokenRepository.findByKey(authentication.getName())
                 .orElseThrow(() -> new UnauthenticatedException(ErrorCode.UN_AUTHENTICATION));
@@ -74,5 +82,20 @@ class TokenService {
 
         // 3일 이상 → access만 재발급
         return jwtProvider.refreshAccessToken(authentication, refreshToken);
+    }
+
+    @Transactional
+    public void addBlacklistToken(String refreshToken) {
+        LocalDateTime expirationAt = jwtProvider.getExpirationTime(refreshToken);
+        BlacklistedToken entity = BlacklistedToken.builder()
+                .token(refreshToken)
+                .expirationAt(expirationAt)
+                .build();
+
+        blackListedTokenRepository.save(entity);
+    }
+
+    private boolean isBlacklisted(String refreshToken) {
+        return blackListedTokenRepository.existsByToken(refreshToken);
     }
 }

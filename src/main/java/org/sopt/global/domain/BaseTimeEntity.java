@@ -1,4 +1,4 @@
-package org.sopt.global;
+package org.sopt.global.domain;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

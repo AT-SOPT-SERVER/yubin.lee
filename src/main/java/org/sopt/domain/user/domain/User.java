@@ -1,9 +1,9 @@
-package org.sopt.domain.user.model;
+package org.sopt.domain.user.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.sopt.domain.comment.domain.PostComment;
-import org.sopt.domain.post.model.Post;
+import org.sopt.domain.post.domain.Post;
 
 import java.util.List;
 

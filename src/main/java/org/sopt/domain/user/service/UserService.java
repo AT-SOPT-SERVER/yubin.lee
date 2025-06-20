@@ -1,17 +1,14 @@
 package org.sopt.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sopt.domain.post.model.Post;
 import org.sopt.domain.user.dto.jwt.ValidatedTokenResult;
-import org.sopt.domain.user.dto.request.TokenRequest;
 import org.sopt.domain.user.dto.request.UserLoginRequest;
 import org.sopt.domain.user.dto.response.TokenDto;
-import org.sopt.domain.user.model.RefreshToken;
-import org.sopt.domain.user.model.Role;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.user.domain.RefreshToken;
+import org.sopt.domain.user.domain.Role;
+import org.sopt.domain.user.domain.User;
 import org.sopt.domain.user.dto.request.UserCreateRequest;
-import org.sopt.global.exception.CustomAccessDeniedException;
-import org.sopt.global.ErrorCode;
+import org.sopt.global.enums.ErrorCode;
 import org.sopt.global.exception.CustomNotFoundException;
 import org.sopt.global.exception.UnauthenticatedException;
 import org.sopt.domain.user.repository.UserRepository;
@@ -52,25 +49,15 @@ public class UserService {
         return tokenService.generateAndSaveToken(user);
     }
 
-    public TokenDto reissueToken(TokenRequest tokenRequest) {
-        ValidatedTokenResult result = tokenService.validateRefreshToken(tokenRequest.accessToken(), tokenRequest.refreshToken());
-        RefreshToken refreshToken = result.refreshToken();
+    public TokenDto reissueToken(String refreshToken) {
+        ValidatedTokenResult result = tokenService.validateRefreshToken(refreshToken);
+        RefreshToken refresh = result.refreshToken();
         Authentication authentication = result.authentication();
 
-        if (!refreshToken.getValue().equals(tokenRequest.refreshToken())) {
+        if (!refresh.getValue().equals(refreshToken)) {
             throw new UnauthenticatedException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        return tokenService.generateNewRefreshToken(authentication, refreshToken);
-    }
-
-    public User existsUser(Long userId){
-        return userRepository.findById(userId).orElseThrow(() -> new UnauthenticatedException(ErrorCode.UN_AUTHENTICATION));
-    }
-
-    public void validatePostOwnership(Post post, User user) {
-        if (!post.getUser().getId().equals(user.getId())) {
-            throw new CustomAccessDeniedException(ErrorCode.POST_ACCESS_DENIED);
-        }
+        return tokenService.generateNewRefreshToken(authentication, refresh);
     }
 }

@@ -1,4 +1,4 @@
-package org.sopt.global;
+package org.sopt.global.enums;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -9,6 +9,7 @@ public enum ErrorCode {
     // COMMON
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST.value(), "요청값이 유효하지 않습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류 발생함!! 로그 확인하세용"),
+    NOT_FOUND_PAGE(HttpStatus.NOT_FOUND.value(), "페이지를 찾을 수 없습니다."),
 
     // POST
     NOT_FOUND_POST(HttpStatus.NOT_FOUND.value(), "게시물을 찾을 수 없습니다."),
@@ -21,7 +22,6 @@ public enum ErrorCode {
     // USER
     UN_AUTHENTICATION(HttpStatus.UNAUTHORIZED.value(), "로그인이 필요합니다."),
     POST_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "게시물에 대한 접근 권한이 없습니다."),
-    POST_WRITE_DENIED(HttpStatus.FORBIDDEN.value(), "게시물 쓰기 권한이 없습니다."),
     COMMENT_WRITE_DENIED(HttpStatus.FORBIDDEN.value(), "댓글 쓰기 권한이 없습니다."),
     COMMENT_DELETE_DENIED(HttpStatus.FORBIDDEN.value(), "댓글 삭제 권한이 없습니다."),
     NOT_FOUND_USER(HttpStatus.NOT_FOUND.value(), "등록되지 않은 유저입니다."),

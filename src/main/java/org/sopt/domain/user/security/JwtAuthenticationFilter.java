@@ -4,7 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.sopt.domain.user.dto.jwt.CustomUser;
+import lombok.NonNull;
+import org.sopt.domain.user.dto.jwt.UserDetails;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,8 +26,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        String requestURI = request.getRequestURI();
+
+        if (requestURI.equals("/users/reissue") || requestURI.equals("/users/logout")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header == null || !header.startsWith("Bearer ")) {
@@ -37,11 +45,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = header.substring(7); // "Token " 제외
 
         if (StringUtils.hasText(accessToken) && jwtProvider.validateToken(accessToken)) {
-            // CustomUser 생성
-            CustomUser principal = jwtProvider.getCustomUser(accessToken);
+            // UserDetails 생성
+            UserDetails principal = jwtProvider.getUserDetails(accessToken);
             List<GrantedAuthority> authorities = jwtProvider.getAuthorities(accessToken);
 
-            // 커스텀 인증 객체 생성
             JwtAuthentication authentication = new JwtAuthentication(principal, accessToken, authorities);
 
             // SecurityContext에 저장

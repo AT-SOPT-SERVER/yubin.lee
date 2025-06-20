@@ -1,10 +1,10 @@
-package org.sopt.domain.like.model;
+package org.sopt.domain.like.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.sopt.domain.comment.domain.PostComment;
-import org.sopt.domain.user.model.User;
-import org.sopt.global.BaseTimeEntity;
+import org.sopt.domain.user.domain.User;
+import org.sopt.global.domain.BaseTimeEntity;
 
 @Entity
 @Table(

@@ -3,15 +3,15 @@ package org.sopt.domain.post.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.post.dto.response.PostAllResponseDto;
-import org.sopt.global.ResponseMessage;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.user.dto.jwt.UserDetails;
+import org.sopt.global.enums.ResponseMessage;
 import org.sopt.domain.post.dto.request.PostRequestDto;
 import org.sopt.domain.post.dto.response.PostListsDto;
 import org.sopt.domain.post.dto.response.PostDetailResponseDto;
 import org.sopt.global.dto.response.SuccessResponse;
 import org.sopt.domain.post.service.PostService;
-import org.sopt.domain.user.service.UserService;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,22 +20,20 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-    private final UserService userService;
 
     @GetMapping
-    public SuccessResponse<PostAllResponseDto> getAllPosts(@RequestParam("pageSize") int pageSize,
-                                                           @RequestParam("pageNumber") int pageNumber) {
+    public SuccessResponse<PostAllResponseDto> getAllPosts(@RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                                           @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber) {
         Page<PostListsDto> allPosts = postService.getAllPosts(pageNumber, pageSize);
-        return new SuccessResponse<>(PostAllResponseDto.of(allPosts));
+        return new SuccessResponse<>(ResponseMessage.GET_POST_SUCCESS.getMessage(), PostAllResponseDto.of(allPosts));
     }
 
     @PostMapping
     public SuccessResponse<String> createPost(
-            @RequestHeader("userId") Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid final PostRequestDto postRequestDto){
 
-        User user = userService.existsUser(userId);
-        postService.createPost(user, postRequestDto);
+        postService.createPost(userDetails.userId(), postRequestDto);
         return new SuccessResponse<>(ResponseMessage.CREATE_POST_SUCCESS.getMessage());
     }
 
@@ -43,27 +41,25 @@ public class PostController {
     public SuccessResponse<PostDetailResponseDto> getPostById(@PathVariable("postId") Long id){
 
         PostDetailResponseDto postResponseDto = postService.getPostById(id);
-        return new SuccessResponse<>(postResponseDto);
+        return new SuccessResponse<>(ResponseMessage.GET_POST_DETAIL_SUCCESS.getMessage(), postResponseDto);
     }
 
     @PatchMapping("/{postId}")
     public SuccessResponse<String> updatePostTitle(
-            @RequestHeader("userId") Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("postId") Long id,
             @RequestBody @Valid final PostRequestDto postRequestDto){
 
-        User user = userService.existsUser(userId);
-        postService.updatePosts(id, user, postRequestDto);
+        postService.updatePosts(id, userDetails.userId(), postRequestDto);
         return new SuccessResponse<>(ResponseMessage.UPDATE_POST_SUCCESS.getMessage());
     }
 
     @DeleteMapping("/{postId}")
     public SuccessResponse<String> deletePostById(
-            @RequestHeader("userId") Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("postId") Long id){
 
-        User user = userService.existsUser(userId);
-        postService.deletePostById(id, user);
+        postService.deletePostById(id, userDetails.userId());
         return new SuccessResponse<>(ResponseMessage.DELETE_POST_SUCCESS.getMessage());
     }
 
@@ -75,6 +71,6 @@ public class PostController {
             @RequestParam("pageNumber") int pageNumber){
 
         Page<PostListsDto> posts = postService.searchPosts(keywords, category, pageNumber, pageSize);
-        return new SuccessResponse<>(PostAllResponseDto.of(posts));
+        return new SuccessResponse<>(ResponseMessage.SEARCH_POST_SUCCESS.getMessage(), PostAllResponseDto.of(posts));
     }
 }

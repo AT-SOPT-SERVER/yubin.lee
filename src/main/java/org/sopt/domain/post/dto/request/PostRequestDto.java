@@ -2,8 +2,8 @@ package org.sopt.domain.post.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import org.sopt.domain.post.model.Post;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.post.domain.Post;
+import org.sopt.domain.user.domain.User;
 
 public record PostRequestDto(
         @NotBlank(message = "제목을 입력해야 합니다.")

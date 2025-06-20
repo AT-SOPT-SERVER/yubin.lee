@@ -1,6 +1,6 @@
 package org.sopt.domain.like.repository;
 
-import org.sopt.domain.like.model.PostCommentLike;
+import org.sopt.domain.like.domain.PostCommentLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

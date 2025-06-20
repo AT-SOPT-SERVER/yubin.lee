@@ -1,7 +1,7 @@
 package org.sopt.domain.like.dto.response;
 
 import lombok.Builder;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.user.domain.User;
 
 @Builder
 public record UsersWhoLikedPostDto(

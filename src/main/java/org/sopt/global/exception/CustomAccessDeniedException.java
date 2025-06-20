@@ -1,7 +1,7 @@
 package org.sopt.global.exception;
 
 import lombok.Getter;
-import org.sopt.global.ErrorCode;
+import org.sopt.global.enums.ErrorCode;
 
 @Getter
 public class CustomAccessDeniedException extends RuntimeException {

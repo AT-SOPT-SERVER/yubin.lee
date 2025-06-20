@@ -1,4 +1,4 @@
-package org.sopt.domain.user.model;
+package org.sopt.domain.user.domain;
 
 public enum Role {
     ROLE_USER,

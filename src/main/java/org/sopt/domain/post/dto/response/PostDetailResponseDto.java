@@ -1,6 +1,6 @@
 package org.sopt.domain.post.dto.response;
 
-import org.sopt.domain.post.model.Post;
+import org.sopt.domain.post.domain.Post;
 
 import java.time.LocalDateTime;
 

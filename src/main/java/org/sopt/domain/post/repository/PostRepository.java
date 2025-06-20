@@ -1,7 +1,7 @@
 package org.sopt.domain.post.repository;
 
-import org.sopt.domain.post.model.Post;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.post.domain.Post;
+import org.sopt.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

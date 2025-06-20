@@ -1,7 +1,7 @@
 package org.sopt.domain.like.repository;
 
-import org.sopt.domain.like.model.PostLike;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.like.domain.PostLike;
+import org.sopt.domain.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

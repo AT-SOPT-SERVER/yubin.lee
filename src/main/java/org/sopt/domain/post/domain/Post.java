@@ -1,4 +1,4 @@
-package org.sopt.domain.post.model;
+package org.sopt.domain.post.domain;
 
 import jakarta.persistence.*;
 
@@ -6,11 +6,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.domain.comment.domain.PostComment;
-import org.sopt.global.BaseTimeEntity;
-import org.sopt.domain.like.model.PostLike;
-import org.sopt.domain.user.model.User;
+import org.sopt.global.domain.BaseTimeEntity;
+import org.sopt.domain.like.domain.PostLike;
+import org.sopt.domain.user.domain.User;
 import org.sopt.global.exception.CustomBadRequestException;
-import org.sopt.global.ErrorCode;
+import org.sopt.global.enums.ErrorCode;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package org.sopt.domain.user.security;
 
-import org.sopt.domain.user.dto.jwt.CustomUser;
+import org.sopt.domain.user.dto.jwt.UserDetails;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -8,10 +8,10 @@ import java.util.Collection;
 
 public class JwtAuthentication extends AbstractAuthenticationToken {
 
-    private final CustomUser principal;
+    private final UserDetails principal;
     private final String credentials;
 
-    public JwtAuthentication(CustomUser principal, String credentials, Collection<? extends GrantedAuthority> authorities) {
+    public JwtAuthentication(UserDetails principal, String credentials, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         super.setAuthenticated(true);
 
@@ -20,7 +20,7 @@ public class JwtAuthentication extends AbstractAuthenticationToken {
     }
 
     @Override
-    public CustomUser getPrincipal() {
+    public UserDetails getPrincipal() {
         return principal;
     }
 

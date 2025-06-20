@@ -1,7 +1,7 @@
 package org.sopt.domain.comment.repository;
 
 import org.sopt.domain.comment.domain.PostComment;
-import org.sopt.domain.post.model.Post;
+import org.sopt.domain.post.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

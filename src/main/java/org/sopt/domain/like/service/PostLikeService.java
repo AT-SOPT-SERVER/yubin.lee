@@ -2,13 +2,13 @@ package org.sopt.domain.like.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.like.dto.response.UsersWhoLikedPostDto;
-import org.sopt.domain.like.model.PostLike;
+import org.sopt.domain.like.domain.PostLike;
 import org.sopt.domain.like.repository.PostLikeRepository;
-import org.sopt.domain.post.model.Post;
+import org.sopt.domain.post.domain.Post;
 import org.sopt.domain.post.repository.PostRepository;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.user.domain.User;
 import org.sopt.domain.user.repository.UserRepository;
-import org.sopt.global.ErrorCode;
+import org.sopt.global.enums.ErrorCode;
 import org.sopt.global.exception.CustomBadRequestException;
 import org.sopt.global.exception.CustomNotFoundException;
 import org.springframework.stereotype.Service;

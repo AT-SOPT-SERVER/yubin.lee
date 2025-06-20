@@ -2,12 +2,12 @@ package org.sopt.domain.comment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.comment.domain.PostComment;
-import org.sopt.domain.post.model.Post;
-import org.sopt.domain.user.model.User;
+import org.sopt.domain.post.domain.Post;
+import org.sopt.domain.user.domain.User;
 import org.sopt.domain.comment.dto.request.CommentRequestDto;
 import org.sopt.domain.comment.dto.response.CommentResponse;
 import org.sopt.global.exception.CustomAccessDeniedException;
-import org.sopt.global.ErrorCode;
+import org.sopt.global.enums.ErrorCode;
 import org.sopt.domain.comment.repository.PostCommentRepository;
 import org.sopt.domain.post.repository.PostRepository;
 import org.sopt.domain.user.repository.UserRepository;
