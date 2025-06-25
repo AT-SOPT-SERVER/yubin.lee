@@ -2,6 +2,7 @@ package org.sopt.domain.user.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sopt.domain.user.dto.jwt.UserDetails;
 import org.sopt.domain.user.dto.request.UserCreateRequest;
 import org.sopt.domain.user.dto.request.UserLoginRequest;
 import org.sopt.domain.user.dto.response.TokenDto;
@@ -12,6 +13,7 @@ import org.sopt.domain.user.service.TokenService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -23,9 +25,10 @@ public class UserController {
 
     private final UserService userService;
     private final TokenService tokenService;
+    private static final String REFRESH_TOKEN = "refreshToken";
 
     @PostMapping("/signup")
-    public SuccessResponse<String> createUser(@RequestBody @Valid UserCreateRequest userCreateRequest){
+    public SuccessResponse<String> join(@RequestBody @Valid UserCreateRequest userCreateRequest){
         userService.join(userCreateRequest);
         return new SuccessResponse<>(ResponseMessage.CREATE_USER_SUCCESS.getMessage());
     }
@@ -34,7 +37,7 @@ public class UserController {
     public ResponseEntity<SuccessResponse<TokenDto>> login(@RequestBody @Valid UserLoginRequest userLoginRequest){
         TokenDto tokenDto = userService.login(userLoginRequest);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenDto.refreshToken())
+        ResponseCookie refreshCookie = ResponseCookie.from(REFRESH_TOKEN, tokenDto.refreshToken())
                 .httpOnly(true)
                 //.secure(true) // HTTPS
                 .path("/users")
@@ -51,7 +54,7 @@ public class UserController {
     public ResponseEntity<SuccessResponse<TokenDto>> reissue(@CookieValue("refreshToken") String refreshToken){
         TokenDto tokenDto = userService.reissueToken(refreshToken);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenDto.refreshToken())
+        ResponseCookie refreshCookie = ResponseCookie.from(REFRESH_TOKEN, tokenDto.refreshToken())
                 .httpOnly(true)
                 //.secure(true)
                 .path("/users")
@@ -65,10 +68,12 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<SuccessResponse<String>> logout(@CookieValue("refreshToken") String refreshToken){
-        tokenService.addBlacklistToken(refreshToken);
+    public ResponseEntity<SuccessResponse<String>> logout(@AuthenticationPrincipal UserDetails userDetails,
+                                                          @CookieValue("refreshToken") String refreshToken){
+        userService.logout(userDetails.loginId(), refreshToken);
+        tokenService.addBlacklistToken(refreshToken, userDetails.loginId());
 
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+        ResponseCookie deleteCookie = ResponseCookie.from(REFRESH_TOKEN, "")
                 .httpOnly(true)
                 //.secure(true)
                 .path("/users")

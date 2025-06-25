@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.domain.user.dto.jwt.ValidatedTokenResult;
 import org.sopt.domain.user.dto.request.UserLoginRequest;
 import org.sopt.domain.user.dto.response.TokenDto;
-import org.sopt.domain.user.domain.RefreshToken;
 import org.sopt.domain.user.domain.Role;
 import org.sopt.domain.user.domain.User;
 import org.sopt.domain.user.dto.request.UserCreateRequest;
@@ -51,13 +50,18 @@ public class UserService {
 
     public TokenDto reissueToken(String refreshToken) {
         ValidatedTokenResult result = tokenService.validateRefreshToken(refreshToken);
-        RefreshToken refresh = result.refreshToken();
         Authentication authentication = result.authentication();
 
-        if (!refresh.getValue().equals(refreshToken)) {
+        if (!result.refreshToken().equals(refreshToken)) {
             throw new UnauthenticatedException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        return tokenService.generateNewRefreshToken(authentication, refresh);
+        return tokenService.generateNewRefreshToken(authentication, result.refreshToken());
+    }
+
+    public void logout(String loginId, String refreshToken) {
+        tokenService.validateRefreshToken(refreshToken);
+        tokenService.validateRefreshTokenOwnerId(refreshToken, loginId);
+        tokenService.validateLogoutToken(refreshToken);
     }
 }

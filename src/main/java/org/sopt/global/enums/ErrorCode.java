@@ -31,6 +31,7 @@ public enum ErrorCode {
     UN_SUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED.value(),"지원하지 않는 토큰입니다."),
     INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED.value(), "잘못된 JWT 서명입니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED.value(),"유효하지 않은 JWT 입니다."),
+    INVALID_TOKEN_OWNER(HttpStatus.UNAUTHORIZED.value(),"로그인한 사용자의 Refresh Token이 아닙니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 일치하지 않습니다."),
 
     // COMMENT

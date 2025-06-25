@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
 
-        if (requestURI.equals("/users/reissue") || requestURI.equals("/users/logout")) {
+        if (requestURI.equals("/users/reissue")) {
             filterChain.doFilter(request, response);
             return;
         }

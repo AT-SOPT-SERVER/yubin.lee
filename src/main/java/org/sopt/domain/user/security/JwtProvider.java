@@ -6,7 +6,6 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.domain.user.dto.jwt.UserDetails;
 import org.sopt.domain.user.dto.response.TokenDto;
-import org.sopt.domain.user.domain.RefreshToken;
 import org.sopt.domain.user.domain.User;
 import org.sopt.domain.user.repository.UserRepository;
 import org.sopt.global.enums.ErrorCode;
@@ -18,8 +17,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -34,7 +31,6 @@ public class JwtProvider {
     private final UserRepository userRepository;
     private static final long ACCESS_TOKEN_EXPIRED_TIME = 1000L * 60 * 3;            // 30분
     private static final long REFRESH_TOKEN_EXPIRED_TIME = 1000L * 60 * 60 * 24 * 7;  // 7일
-    private static final long THREE_DAYS = 1000L * 60 * 60 * 24 * 3;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String USER_KEY = "user";
     private static final String BEARER_TYPE = "Bearer";
@@ -53,11 +49,11 @@ public class JwtProvider {
         return TokenDto.of(BEARER_TYPE, accessToken, refreshToken, nowTime + ACCESS_TOKEN_EXPIRED_TIME);
     }
 
-    public TokenDto refreshAccessToken(Authentication authentication, RefreshToken refreshToken) {
+    public TokenDto refreshAccessToken(Authentication authentication, String refreshToken) {
         long nowTime = (new Date()).getTime();
         String accessToken = createAccessToken(authentication, nowTime);
 
-        return TokenDto.of(BEARER_TYPE, accessToken, refreshToken.getValue(), nowTime + ACCESS_TOKEN_EXPIRED_TIME);
+        return TokenDto.of(BEARER_TYPE, accessToken, refreshToken, nowTime + ACCESS_TOKEN_EXPIRED_TIME);
     }
 
     public String createAccessToken(Authentication authentication, long nowTime) {
@@ -113,17 +109,14 @@ public class JwtProvider {
         return new JwtAuthentication(principal, null, authorities);
     }
 
-
-    public boolean refreshTokenPeriodCheck(String token) {
+    public long refreshTokenPeriodCheck(String token) {
         Claims claims = parseClaims(token);
 
         long now = (new Date()).getTime();
         long expiration = claims.getExpiration().getTime();
 
         // 만료까지 남은 시간
-        long timeLeft = expiration - now;
-
-        return timeLeft < THREE_DAYS;
+        return expiration - now;
     }
 
     private Claims parseClaims(String token) {
@@ -149,6 +142,26 @@ public class JwtProvider {
                     .getBody();
 
             return new UserDetails(claims.getSubject(), claims.get(USER_KEY, Long.class));
+        } catch (ExpiredJwtException e) {
+            throw new UnauthenticatedException(ErrorCode.EXPIRED_TOKEN);
+        } catch (UnsupportedJwtException e) {
+            throw new UnauthenticatedException(ErrorCode.UN_SUPPORTED_TOKEN);
+        } catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            throw new UnauthenticatedException(ErrorCode.INVALID_SIGNATURE);
+        } catch (IllegalArgumentException e) {
+            throw new UnauthenticatedException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
+    public String getLoginId(String refreshToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+
+            return claims.getSubject();
         } catch (ExpiredJwtException e) {
             throw new UnauthenticatedException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException e) {
@@ -191,9 +204,13 @@ public class JwtProvider {
         }
     }
 
-    public LocalDateTime getExpirationTime(String token) {
+    public long getExpirationTimeInSeconds(String token) {
         Claims claims = parseClaims(token);
         Date expiration = claims.getExpiration();
-        return expiration.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        long expirationTimeMillis = expiration.getTime();
+        long nowMillis = System.currentTimeMillis();
+        long ttlInMillis = expirationTimeMillis - nowMillis;
+
+        return Math.max(ttlInMillis / 1000, 0);
     }
 }
