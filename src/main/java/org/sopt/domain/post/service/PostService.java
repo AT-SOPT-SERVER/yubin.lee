@@ -2,6 +2,7 @@ package org.sopt.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.domain.post.domain.Post;
+import org.sopt.domain.post.dto.response.PostAllResponseDto;
 import org.sopt.domain.user.domain.User;
 import org.sopt.domain.post.dto.request.PostRequestDto;
 import org.sopt.domain.post.dto.response.PostListsDto;
@@ -13,6 +14,9 @@ import org.sopt.global.exception.CustomNotFoundException;
 import org.sopt.global.enums.ErrorCode;
 import org.sopt.domain.post.repository.PostRepository;
 import org.sopt.global.exception.UnauthenticatedException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,20 +49,33 @@ public class PostService {
 
     // 전체 게시글 조회 (최신순)
     @Transactional(readOnly = true)
-    public Page<PostListsDto> getAllPosts(int pageNumber, int pageSize){
+    @Cacheable(
+            key = "'page=' + #pageNumber + ',size=' + #pageSize",
+            value = "findAllPosts"
+    )
+    public PostAllResponseDto getAllPosts(int pageNumber, int pageSize){
         if (pageNumber < 0) throw new CustomBadRequestException(ErrorCode.NOT_FOUND_PAGE);
         Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        return postRepository.findAll(pageable).map(PostListsDto::from);
+        Page<PostListsDto> postListsDto = postRepository.findAll(pageable).map(PostListsDto::from);
+        return PostAllResponseDto.of(postListsDto);
     }
 
     // 게시글 상세 조회
+    @Cacheable(
+            value = "findPostDetail",
+            key = "#id"
+    )
     public PostDetailResponseDto getPostById(Long id){
         Post post = postRepository.findById(id).orElseThrow(()-> new CustomNotFoundException(ErrorCode.NOT_FOUND_POST));
         return PostDetailResponseDto.from(post);
     }
 
     // 게시글 삭제
+    @Caching(evict = {
+            @CacheEvict(value = "findPostDetail", key = "#id"),
+            @CacheEvict(value = "findAllPosts", allEntries = true)
+    })
     public void deletePostById(Long id, long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new CustomNotFoundException(ErrorCode.NOT_FOUND_USER));
@@ -73,6 +90,10 @@ public class PostService {
 
     // 게시글 수정
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "findPostDetail", key = "#id"),
+            @CacheEvict(value = "findAllPosts", allEntries = true)
+    })
     public void updatePosts(Long id, long userId, PostRequestDto postRequestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_USER));

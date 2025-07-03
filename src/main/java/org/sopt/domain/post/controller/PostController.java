@@ -24,8 +24,8 @@ public class PostController {
     @GetMapping
     public SuccessResponse<PostAllResponseDto> getAllPosts(@RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                                            @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber) {
-        Page<PostListsDto> allPosts = postService.getAllPosts(pageNumber, pageSize);
-        return new SuccessResponse<>(ResponseMessage.GET_POST_SUCCESS.getMessage(), PostAllResponseDto.of(allPosts));
+        PostAllResponseDto allPosts = postService.getAllPosts(pageNumber, pageSize);
+        return new SuccessResponse<>(ResponseMessage.GET_POST_SUCCESS.getMessage(), allPosts);
     }
 
     @PostMapping
