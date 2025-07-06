@@ -1,0 +1,35 @@
+package org.sopt.domain.like.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.sopt.domain.comment.domain.PostComment;
+import org.sopt.domain.user.domain.User;
+import org.sopt.global.domain.BaseTimeEntity;
+
+@Entity
+@Table(
+        indexes = {
+                @Index(name = "idx_post_comment_id", columnList = "post_comment_id")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_post", columnNames = {"user_id", "post_comment_id"})
+        }
+)
+@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class PostCommentLike extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "post_comment_id")
+    private PostComment postComment;
+}
