@@ -16,8 +16,9 @@ public class PostCommentLikeController {
     private final PostCommentLikeService postCommentLikeService;
 
     @GetMapping
-    public SuccessResponse<Long> getPostCommentLikes(@PathVariable("commentId") long commentId){
-        long count = postCommentLikeService.countPostCommentLikes(commentId);
+    public SuccessResponse<Long> getPostCommentLikes(@AuthenticationPrincipal UserDetails userDetails,
+                                                     @PathVariable("commentId") long commentId){
+        long count = postCommentLikeService.countPostCommentLikes(commentId, userDetails.userId());
         return new SuccessResponse<>(ResponseMessage.COUNT_COMMENT_LIKE_SUCCESS.getMessage(), count);
     }
 

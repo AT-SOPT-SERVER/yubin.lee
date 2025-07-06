@@ -1,6 +1,7 @@
 package org.sopt.domain.post.repository;
 
 import org.sopt.domain.post.domain.Post;
+import org.sopt.domain.post.repository.custom.PostRepositoryCustom;
 import org.sopt.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,10 +12,8 @@ import java.util.Optional;
 
 // CRUD
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
 
-    Page<Post> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
-    Page<Post> findByUserNameContainingIgnoreCase(String keyword, Pageable pageable);
     boolean existsByTitle(String title);
     boolean existsByTitleAndIdNot(String title, Long id);
     Optional<Post> findTopByUserOrderByCreatedDateDesc(User user);

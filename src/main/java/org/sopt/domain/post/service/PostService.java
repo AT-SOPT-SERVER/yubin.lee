@@ -109,18 +109,10 @@ public class PostService {
     }
 
     // 카테고리별 게시물 검색
-    public Page<PostListsDto> searchPosts(String keyword, String category, int pageNumber, int pageSize) {
+    public Page<PostListsDto> searchPosts(String keyword, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return switch (category.toLowerCase()) {
-            case "title" ->
-                    postRepository.findByTitleContainingIgnoreCase(keyword, pageable)
-                    .map(PostListsDto::from);
-            case "author" ->
-                    postRepository.findByUserNameContainingIgnoreCase(keyword, pageable)
-                    .map(PostListsDto::from);
-            default ->
-                    throw new CustomBadRequestException(ErrorCode.INVALID_INPUT_VALUE);
-        };
+
+        return postRepository.searchByWhere(keyword, pageable);
     }
 
     // 중복된 게시물

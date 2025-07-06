@@ -65,12 +65,11 @@ public class PostController {
 
     @GetMapping("/search")
     public SuccessResponse<PostAllResponseDto> searchPostsByKeyword(
-            @RequestParam("category") String category,
             @RequestParam("keyword") String keywords,
             @RequestParam("pageSize") int pageSize,
             @RequestParam("pageNumber") int pageNumber){
 
-        Page<PostListsDto> posts = postService.searchPosts(keywords, category, pageNumber, pageSize);
+        Page<PostListsDto> posts = postService.searchPosts(keywords, pageNumber, pageSize);
         return new SuccessResponse<>(ResponseMessage.SEARCH_POST_SUCCESS.getMessage(), PostAllResponseDto.of(posts));
     }
 }

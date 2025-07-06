@@ -64,15 +64,6 @@ public class PostCommentLikeService {
                 .build();
 
         postCommentLikeRepository.save(postCommentLike);
-
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                String key = COMMENT_LIKE_SET_KEY + commentId;
-                commentLikeCacheRedisTemplate.opsForSet().add(key, String.valueOf(userId));
-                commentLikeCacheRedisTemplate.expire(key, LIKE_CACHE_TTL);
-            }
-        });
     }
 
     @Transactional
@@ -93,14 +84,16 @@ public class PostCommentLikeService {
     }
 
     @Transactional(readOnly = true)
-    public long countPostCommentLikes(long commentId) {
+    public long countPostCommentLikes(long commentId, long userId) {
         String key = COMMENT_LIKE_SET_KEY + commentId;
         Long size = commentLikeCacheRedisTemplate.opsForSet().size(key);
         if (size != null) {
             return size;
         }
 
-        // Redis에 없으면 DB count로 fallback (캐시 저장은 생략하고 조회만 수행)
+        commentLikeCacheRedisTemplate.opsForSet().add(key, String.valueOf(userId));
+        commentLikeCacheRedisTemplate.expire(key, LIKE_CACHE_TTL);
+
         return postCommentLikeRepository.countByPostCommentId(commentId);
     }
 
